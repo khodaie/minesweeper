@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.Contracts;
+﻿using System.ComponentModel;
+using System.Diagnostics.Contracts;
+using System.Linq;
 
 namespace MineSweeper.Domain;
 
@@ -8,119 +10,68 @@ public sealed class Board
 
     public int Columns { get; }
 
-    public int Mines { get; }
-
     private Cell[,] Cells { get; }
 
-    public BoardState State { get; private set; }
-
-    private Board(int rows, int columns, int mines)
+    private Board(int rows, int columns)
     {
         Rows = rows;
         Columns = columns;
-        Mines = mines;
         Cells = new Cell[rows, columns];
     }
 
-    internal static Board CreateInstance(int rows, int columns, int mines)
+    internal static Board CreateInstance(int rows, int columns)
     {
-        var board = new Board(rows, columns, mines);
+        var board = new Board(rows, columns);
 
         for (var row = 0; row < rows; row++)
         {
             for (var column = 0; column < columns; column++)
             {
-                board.Cells[row, column] = Cell.CreateInstance(board, row, column);
+                board.Cells[row, column] = Cell.CreateInstance(row, column);
             }
         }
 
         return board;
     }
 
-    internal void PlaceMines() => PlaceMines(Random.Shared);
-
-    internal void PlaceMines(Random random)
+    public void PlaceMine(in Position position)
     {
-        ArgumentNullException.ThrowIfNull(random, nameof(random));
+        ValidatePosition(position);
 
-        if (State != BoardState.Initializing)
+
+        Cells[position.Row, position.Column].PlaceMine();
+
+        foreach(var cell in GetNeighborCells(position))
         {
-            throw new InvalidOperationException("Mines have already been placed.");
-        }
-
-        var placedMines = 0;
-        while (placedMines < Mines)
-        {
-            var row = random.Next(Rows);
-            var column = random.Next(Columns);
-
-            if (Cells[row, column].IsMine)
+            if (cell.IsMine)
             {
                 continue;
             }
 
-            Cells[row, column].PlaceMine();
-            placedMines++;
+            cell.IncreaseNeighborMinesCount();
         }
-    }
-
-    public Cell GetCell(int row, int column)
-    {
-        if (row < 0 || row >= Rows)
-        {
-            throw new ArgumentOutOfRangeException(nameof(row), "Row coordinate is out of bounds.");
-        }
-
-        if (column < 0 || column >= Columns)
-        {
-            throw new ArgumentOutOfRangeException(nameof(column), "Column coordinate is out of bounds.");
-        }
-
-        return Cells[row, column];
-    }
-
-    public Cell this[int row, int column] => GetCell(row, column);
-
-    internal void Start()
-    {
-        if (State != BoardState.Initializing)
-        {
-            throw new InvalidOperationException("Game has already started.");
-        }
-
-        State = BoardState.InProgress;
-    }
-
-    internal void GameOver()
-    {
-        if (State != BoardState.InProgress)
-        {
-            throw new InvalidOperationException("Game is not in progress.");
-        }
-
-        State = BoardState.GameOver;
-    }
-
-    internal void Win()
-    {
-        if (State != BoardState.InProgress)
-        {
-            throw new InvalidOperationException("Game is not in progress.");
-        }
-
-        State = BoardState.Won;
     }
 
     [Pure]
-    internal IEnumerable<Cell> GetAdjacentCells(Cell cell)
+    public Cell GetCell(in Position position)
     {
-        ArgumentNullException.ThrowIfNull(cell);
+        ValidatePosition(position);
 
-        for (var row = cell.Row - 1; row <= cell.Row + 1; row++)
+        return Cells[position.Row, position.Column];
+    }
+
+    public Cell this[int row, int column] => GetCell(new Position(row, column));
+
+    public Cell this[in Position position] => GetCell(position);
+
+    [Pure]
+    public IEnumerable<Cell> GetNeighborCells(Position position)
+    {
+        for (var row = position.Row - 1; row <= position.Row + 1; row++)
         {
-            for (var column = cell.Column - 1; column <= cell.Column + 1; column++)
+            for (var column = position.Column - 1; column <= position.Column + 1; column++)
             {
-                if (row == cell.Row && column == cell.Column)
+                if (row == position.Row && column == position.Column)
                 {
                     continue;
                 }
@@ -128,13 +79,29 @@ public sealed class Board
                 {
                     continue;
                 }
+
                 yield return Cells[row, column];
             }
         }
     }
 
     [Pure]
-    internal int GetUnrevealedCellsCount()
+    public int GetAdjacentMinesCount(in Position position)
+    {
+        var count = 0;
+        foreach (var adjacentCell in GetNeighborCells(position))
+        {
+            if (adjacentCell.IsMine)
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    [Pure]
+    public int GetUnrevealedCellsCount()
     {
         var count = 0;
 
@@ -151,4 +118,74 @@ public sealed class Board
 
         return count;
     }
+
+    public void RevealCell(in Position position)
+    {
+        ValidatePosition(position);
+        
+        var cell = Cells[position.Row, position.Column];
+        
+        if (cell.IsRevealed || cell.IsFlagged)
+            return;
+        
+        RevealRecursive(cell, []);
+    }
+
+    public bool AreAllCellsRevealedOrFlagged()
+    {
+        for (var row = 0; row < Rows; row++)
+        {
+            for (var column = 0; column < Columns; column++)
+            {
+                var cell = Cells[row, column];
+                if (cell is { IsRevealed: false, IsFlagged: false })
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    internal void PlaceMines(int minesCount, Random random)
+    {
+        ArgumentNullException.ThrowIfNull(random);
+
+        var placedMines = 0;
+        while (placedMines < minesCount)
+        {
+            var row = random.Next(Rows);
+            var column = random.Next(Columns);
+
+            if (Cells[row, column].IsMine)
+            {
+                continue;
+            }
+
+            Cells[row, column].PlaceMine();
+            placedMines++;
+        }
+    }
+
+    private void RevealRecursive(Cell cell, HashSet<Cell> handledCells)
+    { 
+        if (cell.IsRevealed || !handledCells.Add(cell))
+            return;
+
+        cell.Reveal();
+
+        if (cell.IsMine)
+            return;
+
+        if (cell.NeighborMinesCount == 0)
+        {
+            foreach (var adjacentCell in GetNeighborCells(cell.Position))
+            {
+                RevealRecursive(adjacentCell, handledCells);
+            }
+        }
+    }
+
+    private void ValidatePosition(in Position position) => position.Validate(Rows, Columns);
 }

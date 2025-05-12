@@ -74,7 +74,7 @@ public sealed class BoardTests
         board.Start();
 
         // Assert
-        Assert.Equal(BoardState.InProgress, board.State);
+        Assert.Equal(GameState.InProgress, board.State);
     }
 
     [Fact]
@@ -88,7 +88,7 @@ public sealed class BoardTests
         board.GameOver();
 
         // Assert
-        Assert.Equal(BoardState.GameOver, board.State);
+        Assert.Equal(GameState.GameOver, board.State);
     }
 
     [Fact]
@@ -102,7 +102,7 @@ public sealed class BoardTests
         board.Win();
 
         // Assert
-        Assert.Equal(BoardState.Won, board.State);
+        Assert.Equal(GameState.Won, board.State);
     }
 
     [Fact]

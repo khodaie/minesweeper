@@ -114,12 +114,12 @@ public partial class GameControl : UserControl
         
         DrawGame(cell.Board);
 
-        if (cell.Board.State == BoardState.GameOver)
+        if (cell.Board.State == GameState.GameOver)
         {
             MessageBox.Show("Game Over");
             IsEnabled = false;
         }
-        else if (cell.Board.State == BoardState.Won)
+        else if (cell.Board.State == GameState.Won)
         {
             MessageBox.Show("You won!");
             IsEnabled = false;
@@ -164,7 +164,7 @@ public partial class GameControl : UserControl
                 {
                     button.Content = "⚑";
                 }
-                else if (cell.Board.State == BoardState.GameOver && cell.IsMine)
+                else if (cell.Board.State == GameState.GameOver && cell.IsMine)
                 {
                     if (!cell.IsRevealed)
                     {
@@ -179,7 +179,7 @@ public partial class GameControl : UserControl
                         button.Content = "💣";
                     }
                 }
-                else if (cell.Board.State == BoardState.Won && cell.IsMine)
+                else if (cell.Board.State == GameState.Won && cell.IsMine)
                 {
                     button.Background = System.Windows.Media.Brushes.Green;
                     button.Foreground = System.Windows.Media.Brushes.Gray;

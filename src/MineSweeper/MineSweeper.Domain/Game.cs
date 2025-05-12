@@ -1,34 +1,92 @@
-﻿namespace MineSweeper.Domain;
+﻿using System.Linq;
+
+namespace MineSweeper.Domain;
 
 public sealed class Game
 {
+    public GameState State { get; private set; }
+
     public required Board Board { get; init; }
-    private Game()
-    {        
+
+    public int Mines { get; }
+
+    private Game(int mines)
+    {
+        Mines = mines;
     }
 
-    public static Game Create(int rows, int columns, int mines)
+    public static Game Create(int rows, int columns, int mines) =>
+        Create(rows, columns, mines, Random.Shared);
+
+    public static Game Create(int rows, int columns, int mines, Random random)
     {
-        var board = Board.CreateInstance(rows, columns, mines);
-        board.PlaceMines();
-        board.Start();
-        
-        var game = new Game()
+        var board = Board.CreateInstance(rows, columns);
+                       
+        var game = new Game(mines)
         {
             Board = board
         };
 
+        board.PlaceMines(mines, random);
+        game.Start();
+
         return game;
     }
 
-    public void RevealCell(int row, int column)
+    public OperationResult RevealCell(in Position position)
     {
-        var cell = Board.GetCell(row, column);
-        cell.Reveal();
+        var cell = Board[position];
+
+        Board.RevealCell(position);
+
+        if (cell.IsMine)
+        {
+            GameOver();
+            return OperationResults.GameOver;
+        }
+
+        if(Board.AreAllCellsRevealedOrFlagged())
+        {
+            Win();
+            return OperationResults.GameWon;
+        }
+
+        return OperationResult.Success;
     }
-    public void FlagCell(int row, int column)
+
+    public void ToggleFlag(in Position position)
     {
-        var cell = Board.GetCell(row, column);
+        var cell = Board[position];
         cell.ToggleFlag();
     }
+
+    private void Start()
+    {
+        if (State != GameState.Initializing)
+        {
+            throw new InvalidOperationException("Game has already started.");
+        }
+
+        State = GameState.InProgress;
+    }
+
+    private void GameOver()
+    {
+        if (State != GameState.InProgress)
+        {
+            throw new InvalidOperationException("Game is not in progress.");
+        }
+
+        State = GameState.GameOver;
+    }
+
+    private void Win()
+    {
+        if (State != GameState.InProgress)
+        {
+            throw new InvalidOperationException("Game is not in progress.");
+        }
+
+        State = GameState.Won;
+    }    
 }

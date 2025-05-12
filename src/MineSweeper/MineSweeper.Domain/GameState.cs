@@ -1,6 +1,6 @@
 ﻿namespace MineSweeper.Domain;
 
-public enum BoardState
+public enum GameState
 {
     Initializing,
     InProgress,
