@@ -19,5 +19,5 @@ public readonly record struct Position
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(Row, rows);
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(Column, columns);
-    }   
+    }
 }

@@ -15,10 +15,10 @@ public sealed class OperationResult
     {
         IsSuccess = isSuccess;
         Message = message;
-    }    
+    }
 }
 
-internal static class OperationResults
+public static class OperationResults
 {
     public static OperationResult GameOver { get; } = OperationResult.CreateFailure("Game Over");
 

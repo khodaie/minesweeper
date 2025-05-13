@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace MineSweeper.Domain;
+﻿namespace MineSweeper.Domain;
 
 public sealed class Game
 {
@@ -21,7 +19,7 @@ public sealed class Game
     public static Game Create(int rows, int columns, int mines, Random random)
     {
         var board = Board.CreateInstance(rows, columns);
-                       
+
         var game = new Game(mines)
         {
             Board = board
@@ -33,11 +31,11 @@ public sealed class Game
         return game;
     }
 
-    public OperationResult RevealCell(in Position position)
+    public OperationResult RevealCell(in Position position, out IReadOnlyCollection<Cell> affectedCells)
     {
         var cell = Board[position];
 
-        Board.RevealCell(position);
+        Board.RevealCell(position, out affectedCells);
 
         if (cell.IsMine)
         {
@@ -45,7 +43,7 @@ public sealed class Game
             return OperationResults.GameOver;
         }
 
-        if(Board.AreAllCellsRevealedOrFlagged())
+        if (Board.AreAllCellsRevealedOrFlagged())
         {
             Win();
             return OperationResults.GameWon;
@@ -88,5 +86,5 @@ public sealed class Game
         }
 
         State = GameState.Won;
-    }    
+    }
 }

@@ -1,51 +1,81 @@
-﻿using MineSweeper.Domain;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 
-using System.Windows;
+using MineSweeper.Domain;
+
+using System.Windows.Input;
 
 using DomainGame = MineSweeper.Domain.Game;
 
 namespace MineSweeper.GameWindow;
 
-public sealed class GameViewModel : DependencyObject
+public sealed record GameInfo(int Rows, int Columns, int Mines);
+
+public sealed class GameViewModel : ObservableObject
 {
-    private DomainGame? _game;
+    private readonly IMessenger _messenger;
 
-    public int RowsCount
+    private readonly RelayCommand<CellViewModel> _revealCellCommand, _flagCommand;
+
+    public GameViewModel(GameInfo gameInfo, IMessenger messenger)
     {
-        get => (int)GetValue(RowsCountProperty);
-        set => SetValue(RowsCountProperty, value);
+        Game = DomainGame.Create(gameInfo.Rows, gameInfo.Columns, gameInfo.Mines);
+        BoardViewModel = new BoardViewModel(Game.Board);
+        _messenger = messenger;
+        _revealCellCommand = new RelayCommand<CellViewModel>(RevealCell, CanRevealCell);
+        _flagCommand = new RelayCommand<CellViewModel>(FlagCell, CanExecuteFlagCommand);
     }
 
-    public static readonly DependencyProperty RowsCountProperty =
-        DependencyProperty.Register(nameof(RowsCount), typeof(int), typeof(GameViewModel), new PropertyMetadata(0));
+    private bool CanRevealCell(CellViewModel? cell) => cell is { IsRevealed: false, IsFlagged: false };
 
+    public DomainGame Game { get; }
+    public BoardViewModel BoardViewModel { get; }
 
-    public int ColumnsCount
+    public ICommand RevealCellCommand => _revealCellCommand;
+
+    public ICommand FlagCommand => _flagCommand;
+
+    private void RevealCell(CellViewModel? cell)
     {
-        get => (int)GetValue(ColumnsCountProperty);
-        set => SetValue(ColumnsCountProperty, value);
+        if (cell is null)
+            return;
+
+        var operationResult = Game.RevealCell(cell.Position, out var affectedCells);
+        
+        if (affectedCells.Count != 0)
+            RefreshCells(affectedCells.Select(c => BoardViewModel.GetCell(c.Position)));
+
+        if (operationResult == OperationResults.GameOver)
+        {
+            _messenger.Send(new GameOverMessage());            
+        }
+        else if(operationResult == OperationResults.GameWon)
+        { 
+            _messenger.Send(new GameWonMessage()); 
+        }
+
+        _flagCommand.NotifyCanExecuteChanged();
+        _revealCellCommand.NotifyCanExecuteChanged();
     }
 
-    public static readonly DependencyProperty ColumnsCountProperty =
-        DependencyProperty.Register(nameof(ColumnsCount), typeof(int), typeof(GameViewModel), new PropertyMetadata(0));
-
-
-
-    public int MinesCount
+    private void FlagCell(CellViewModel? cell)
     {
-        get => (int)GetValue(MinesCountProperty);
-        set => SetValue(MinesCountProperty, value);
+        if (cell is null)
+            return;
+        Game.ToggleFlag(cell.Position);
+        cell.Refresh();
+        _flagCommand.NotifyCanExecuteChanged();
+        _revealCellCommand.NotifyCanExecuteChanged();
     }
-    public DomainGame Game => _game ?? throw new InvalidOperationException();
 
-    // Using a DependencyProperty as the backing store for MinesCount.  This enables animation, styling, binding, etc...
-    public static readonly DependencyProperty MinesCountProperty =
-        DependencyProperty.Register(nameof(MinesCount), typeof(int), typeof(GameViewModel), new PropertyMetadata(0));
+    private static bool CanExecuteFlagCommand(CellViewModel? cell) => cell is { IsRevealed: false };
 
-
-
-    internal void InitializeGame()
+    private static void RefreshCells(IEnumerable<CellViewModel> cells)
     {
-        _game = DomainGame.Create(RowsCount, ColumnsCount, MinesCount);
+        foreach (var cell in cells)
+        {
+            cell.Refresh();
+        }
     }
 }

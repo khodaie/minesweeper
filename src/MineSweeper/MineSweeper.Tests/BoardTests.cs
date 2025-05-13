@@ -16,8 +16,8 @@ public sealed class BoardTests
         var board = Board.CreateInstance(rows, columns, mines);
 
         // Assert
-        Assert.Equal(rows, board.Rows);
-        Assert.Equal(columns, board.Columns);
+        Assert.Equal(rows, board.RowsCount);
+        Assert.Equal(columns, board.ColumnsCount);
         Assert.Equal(mines, board.Mines);
     }
 

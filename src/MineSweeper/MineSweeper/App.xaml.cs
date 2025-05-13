@@ -9,7 +9,7 @@ namespace MineSweeper
     {
         private void Application_LoadCompleted(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {
-            
+
         }
     }
 

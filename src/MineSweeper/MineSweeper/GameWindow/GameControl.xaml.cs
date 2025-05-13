@@ -7,7 +7,7 @@ using System.Windows.Data;
 
 namespace MineSweeper.GameWindow;
 
-public partial class GameControl : UserControl
+public partial class GameControl
 {
     private const int CellSize = 16;
 
@@ -101,9 +101,9 @@ public partial class GameControl : UserControl
     {
         var button = (Button)sender;
         button.IsEnabled = false;
-        Cell cell = (Cell)button.DataContext;
+        Domain.CellViewModel cell = (Domain.CellViewModel)button.DataContext;
 
-        if(e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
+        if (e.LeftButton == System.Windows.Input.MouseButtonState.Pressed)
         {
             cell.Reveal();
         }
@@ -111,7 +111,7 @@ public partial class GameControl : UserControl
         {
             cell.ToggleFlag();
         }
-        
+
         DrawGame(cell.Board);
 
         if (cell.Board.State == GameState.GameOver)
@@ -146,7 +146,7 @@ public partial class GameControl : UserControl
             {
                 var cell = board.GetCell(i, j);
                 var button = Buttons[i, j];
-                if(cell.IsRevealed)
+                if (cell.IsRevealed)
                 {
                     button.Background = System.Windows.Media.Brushes.White;
                     if (cell.IsMine)
@@ -190,7 +190,7 @@ public partial class GameControl : UserControl
                     button.Background = System.Windows.Media.Brushes.LightGray;
                     button.Content = string.Empty;
                 }
-                
+
             }
         }
     }

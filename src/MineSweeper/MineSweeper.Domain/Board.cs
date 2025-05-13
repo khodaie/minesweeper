@@ -1,21 +1,19 @@
-﻿using System.ComponentModel;
-using System.Diagnostics.Contracts;
-using System.Linq;
+﻿using System.Diagnostics.Contracts;
 
 namespace MineSweeper.Domain;
 
 public sealed class Board
 {
-    public int Rows { get; }
+    public int RowsCount { get; }
 
-    public int Columns { get; }
+    public int ColumnsCount { get; }
 
     private Cell[,] Cells { get; }
 
     private Board(int rows, int columns)
     {
-        Rows = rows;
-        Columns = columns;
+        RowsCount = rows;
+        ColumnsCount = columns;
         Cells = new Cell[rows, columns];
     }
 
@@ -41,7 +39,7 @@ public sealed class Board
 
         Cells[position.Row, position.Column].PlaceMine();
 
-        foreach(var cell in GetNeighborCells(position))
+        foreach (var cell in GetNeighborCells(position))
         {
             if (cell.IsMine)
             {
@@ -75,7 +73,7 @@ public sealed class Board
                 {
                     continue;
                 }
-                if (row < 0 || row >= Rows || column < 0 || column >= Columns)
+                if (row < 0 || row >= RowsCount || column < 0 || column >= ColumnsCount)
                 {
                     continue;
                 }
@@ -105,9 +103,9 @@ public sealed class Board
     {
         var count = 0;
 
-        for (var row = 0; row < Rows; row++)
+        for (var row = 0; row < RowsCount; row++)
         {
-            for (var column = 0; column < Columns; column++)
+            for (var column = 0; column < ColumnsCount; column++)
             {
                 if (!Cells[row, column].IsRevealed)
                 {
@@ -119,23 +117,28 @@ public sealed class Board
         return count;
     }
 
-    public void RevealCell(in Position position)
+    public void RevealCell(in Position position, out IReadOnlyCollection<Cell> affectedCells)
     {
         ValidatePosition(position);
-        
+
         var cell = Cells[position.Row, position.Column];
-        
+
         if (cell.IsRevealed || cell.IsFlagged)
+        {
+            affectedCells = [];
             return;
-        
-        RevealRecursive(cell, []);
+        }
+
+        var handledCells = new HashSet<Cell>();
+        RevealRecursive(cell, handledCells);
+        affectedCells = handledCells;
     }
 
     public bool AreAllCellsRevealedOrFlagged()
     {
-        for (var row = 0; row < Rows; row++)
+        for (var row = 0; row < RowsCount; row++)
         {
-            for (var column = 0; column < Columns; column++)
+            for (var column = 0; column < ColumnsCount; column++)
             {
                 var cell = Cells[row, column];
                 if (cell is { IsRevealed: false, IsFlagged: false })
@@ -148,6 +151,18 @@ public sealed class Board
         return true;
     }
 
+    [Pure]
+    public IEnumerable<Cell> GetAllCells()
+    {
+        for (var row = 0; row < RowsCount; row++)
+        {
+            for (var column = 0; column < ColumnsCount; column++)
+            {
+                yield return Cells[row, column];
+            }
+        }
+    }
+
     internal void PlaceMines(int minesCount, Random random)
     {
         ArgumentNullException.ThrowIfNull(random);
@@ -155,8 +170,8 @@ public sealed class Board
         var placedMines = 0;
         while (placedMines < minesCount)
         {
-            var row = random.Next(Rows);
-            var column = random.Next(Columns);
+            var row = random.Next(RowsCount);
+            var column = random.Next(ColumnsCount);
 
             if (Cells[row, column].IsMine)
             {
@@ -169,8 +184,8 @@ public sealed class Board
     }
 
     private void RevealRecursive(Cell cell, HashSet<Cell> handledCells)
-    { 
-        if (cell.IsRevealed || !handledCells.Add(cell))
+    {
+        if (cell.IsRevealed || cell.IsFlagged || !handledCells.Add(cell))
             return;
 
         cell.Reveal();
@@ -187,5 +202,5 @@ public sealed class Board
         }
     }
 
-    private void ValidatePosition(in Position position) => position.Validate(Rows, Columns);
+    private void ValidatePosition(in Position position) => position.Validate(RowsCount, ColumnsCount);
 }

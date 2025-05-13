@@ -26,7 +26,7 @@ public sealed class Cell
 
     internal void PlaceMine()
     {
-        if(State is not CellState.Hidden)
+        if (State is not CellState.Hidden)
             throw new InvalidOperationException("Cannot place a mine on a revealed or flagged cell.");
 
         IsMine = true;
@@ -37,13 +37,13 @@ public sealed class Cell
     {
         if (State is not CellState.Hidden)
             throw new InvalidOperationException("Cannot set neighbor mines count on a revealed or flagged cell.");
-                
+
         NeighborMinesCount++;
     }
 
     public void Reveal()
     {
-        if(IsRevealed || IsFlagged)
+        if (IsRevealed || IsFlagged)
             return;
 
         State = CellState.Revealed;
@@ -55,5 +55,5 @@ public sealed class Cell
             return;
 
         State = State == CellState.Flagged ? CellState.Hidden : CellState.Flagged;
-    }    
+    }
 }
