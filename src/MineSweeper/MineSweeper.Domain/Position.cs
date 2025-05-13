@@ -1,4 +1,4 @@
-﻿namespace MineSweeper.Domain;
+namespace MineSweeper.Domain;
 
 public readonly record struct Position
 {
@@ -8,8 +8,8 @@ public readonly record struct Position
 
     public Position(int row, int column)
     {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(row);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(column);
+        ArgumentOutOfRangeException.ThrowIfNegative(row);
+        ArgumentOutOfRangeException.ThrowIfNegative(column);
 
         Row = row;
         Column = column;

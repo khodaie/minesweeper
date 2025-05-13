@@ -1,4 +1,4 @@
-﻿namespace MineSweeper.Domain;
+namespace MineSweeper.Domain;
 
 public sealed class Game
 {
@@ -6,11 +6,11 @@ public sealed class Game
 
     public required Board Board { get; init; }
 
-    public int Mines { get; }
+    public int MinesCount { get; }
 
-    private Game(int mines)
+    private Game(int minesCount)
     {
-        Mines = mines;
+        MinesCount = minesCount;
     }
 
     public static Game Create(int rows, int columns, int mines) =>
@@ -52,10 +52,18 @@ public sealed class Game
         return OperationResult.Success;
     }
 
-    public void ToggleFlag(in Position position)
+    public OperationResult ToggleFlag(in Position position)
     {
         var cell = Board[position];
         cell.ToggleFlag();
+
+        if (Board.AreAllCellsRevealedOrFlagged())
+        {
+            Win();
+            return OperationResults.GameWon;
+        }
+
+        return OperationResult.Success;
     }
 
     private void Start()

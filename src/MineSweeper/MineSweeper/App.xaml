@@ -5,6 +5,6 @@
              StartupUri="MainWindow.xaml"
              LoadCompleted="Application_LoadCompleted">
     <Application.Resources>
-         
+
     </Application.Resources>
 </Application>

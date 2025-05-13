@@ -1,8 +1,8 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 namespace MineSweeper.Domain;
 
-[DebuggerDisplay("Cell[{Row}, {Column}]: {State}")]
+[DebuggerDisplay("Cell[{Position.Row}, {Position.Column}]: {State}")]
 public sealed class Cell
 {
     public CellState State { get; private set; } = CellState.Hidden;
@@ -24,6 +24,22 @@ public sealed class Cell
 
     internal static Cell CreateInstance(int row, int column) => new(new Position(row, column));
 
+    public void Reveal()
+    {
+        if (IsRevealed || IsFlagged)
+            return;
+
+        State = CellState.Revealed;
+    }
+
+    public void ToggleFlag()
+    {
+        if (IsRevealed)
+            return;
+
+        State = State == CellState.Flagged ? CellState.Hidden : CellState.Flagged;
+    }
+
     internal void PlaceMine()
     {
         if (State is not CellState.Hidden)
@@ -39,21 +55,5 @@ public sealed class Cell
             throw new InvalidOperationException("Cannot set neighbor mines count on a revealed or flagged cell.");
 
         NeighborMinesCount++;
-    }
-
-    public void Reveal()
-    {
-        if (IsRevealed || IsFlagged)
-            return;
-
-        State = CellState.Revealed;
-    }
-
-    public void ToggleFlag()
-    {
-        if (IsRevealed)
-            return;
-
-        State = State == CellState.Flagged ? CellState.Hidden : CellState.Flagged;
     }
 }

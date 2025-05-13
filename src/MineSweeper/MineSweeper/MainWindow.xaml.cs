@@ -1,22 +1,21 @@
-﻿using System.Windows;
+using System.Windows;
 
-namespace MineSweeper
+namespace MineSweeper;
+
+sealed partial class MainWindow
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+    public MainWindow()
     {
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+    }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            var window = new GameWindow.Game();
-            window.Show();
+    private void Window_Loaded(object sender, RoutedEventArgs e)
+    {
+    }
 
-        }
+    private void StartButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var window = new GameWindow.Game();
+        window.Show();
     }
 }

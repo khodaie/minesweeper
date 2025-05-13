@@ -1,7 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-
+using CommunityToolkit.Mvvm.ComponentModel;
 using MineSweeper.Domain;
-
 using System.Collections.ObjectModel;
 
 namespace MineSweeper.GameWindow;
@@ -20,8 +18,11 @@ public sealed class BoardViewModel : ObservableObject
     public BoardViewModel(Board board)
     {
         Board = board;
-        Cells = [.. Board.GetAllCells()
-            .Select(cell => new CellViewModel(cell))];
+        Cells =
+        [
+            .. Board.GetAllCells()
+                .Select(cell => new CellViewModel(cell))
+        ];
         _cellsByPosition = Cells.ToDictionary(cell => cell.Position);
     }
 

@@ -1,12 +1,7 @@
-﻿namespace MineSweeper.Domain;
+namespace MineSweeper.Domain;
 
 public sealed class OperationResult
 {
-    public static OperationResult Success { get; } = new(true, null);
-    public static OperationResult CreateFailure(string message) => new(false, message);
-
-    public static OperationResult CreateSuccess(string message) => new(true, message);
-
     public bool IsSuccess { get; }
 
     public string? Message { get; }
@@ -16,6 +11,11 @@ public sealed class OperationResult
         IsSuccess = isSuccess;
         Message = message;
     }
+
+    public static OperationResult CreateFailure(string message) => new(false, message);
+
+    public static OperationResult CreateSuccess(string message) => new(true, message);
+    public static OperationResult Success { get; } = new(true, null);
 }
 
 public static class OperationResults

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.Contracts;
+using System.Diagnostics.Contracts;
 
 namespace MineSweeper.Domain;
 
@@ -9,6 +9,10 @@ public sealed class Board
     public int ColumnsCount { get; }
 
     private Cell[,] Cells { get; }
+
+    public Cell this[int row, int column] => GetCell(new Position(row, column));
+
+    public Cell this[in Position position] => GetCell(position);
 
     private Board(int rows, int columns)
     {
@@ -36,7 +40,6 @@ public sealed class Board
     {
         ValidatePosition(position);
 
-
         Cells[position.Row, position.Column].PlaceMine();
 
         foreach (var cell in GetNeighborCells(position))
@@ -58,10 +61,6 @@ public sealed class Board
         return Cells[position.Row, position.Column];
     }
 
-    public Cell this[int row, int column] => GetCell(new Position(row, column));
-
-    public Cell this[in Position position] => GetCell(position);
-
     [Pure]
     public IEnumerable<Cell> GetNeighborCells(Position position)
     {
@@ -73,6 +72,7 @@ public sealed class Board
                 {
                     continue;
                 }
+
                 if (row < 0 || row >= RowsCount || column < 0 || column >= ColumnsCount)
                 {
                     continue;
@@ -167,6 +167,10 @@ public sealed class Board
     {
         ArgumentNullException.ThrowIfNull(random);
 
+        if (minesCount >= RowsCount * ColumnsCount)
+            throw new ArgumentException("The number of the mines should be less than the number of the cells.",
+                nameof(minesCount));
+
         var placedMines = 0;
         while (placedMines < minesCount)
         {
@@ -178,7 +182,8 @@ public sealed class Board
                 continue;
             }
 
-            Cells[row, column].PlaceMine();
+            PlaceMine(new Position(row, column));
+
             placedMines++;
         }
     }

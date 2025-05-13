@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-
+using CommunityToolkit.Mvvm.ComponentModel;
 using MineSweeper.Domain;
 
 namespace MineSweeper.GameWindow;
@@ -26,5 +25,6 @@ public sealed class CellViewModel(Cell cell) : ObservableObject
         OnPropertyChanged(nameof(State));
         OnPropertyChanged(nameof(IsRevealed));
         OnPropertyChanged(nameof(IsFlagged));
+        OnPropertyChanged(nameof(Cell));
     }
 }

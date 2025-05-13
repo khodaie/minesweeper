@@ -1,20 +1,17 @@
-﻿<UserControl x:Class="MineSweeper.GameWindow.GameControl"
+<UserControl x:Class="MineSweeper.GameWindow.GameControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:MineSweeper.GameWindow"
              mc:Ignorable="d"
-             d:DesignHeight="300" 
+             d:DesignHeight="300"
              d:DesignWidth="300"
-             DataContext="{DynamicResource ViewModel}"
-             Loaded="UserControl_Loaded">
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <local:GameViewModel x:Key="ViewModel" RowsCount="24" ColumnsCount="32" MinesCount="64" />
-        </ResourceDictionary>
-    </UserControl.Resources>
+             x:Name="TheGameUserControl"
+             DataContext="{Binding ViewModel, ElementName=TheGameUserControl}"
+             Loaded="GameControl_Loaded"
+             Unloaded="GameControl_OnUnloaded">
     <Grid Name="GameGrid">
-        
+
     </Grid>
 </UserControl>
