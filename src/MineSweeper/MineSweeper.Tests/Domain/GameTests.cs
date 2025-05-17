@@ -117,6 +117,9 @@ public sealed class GameTests
         // Reveal all safe cells
         foreach (var pos in safePositions)
         {
+            if (game.Board[pos].IsRevealed)
+                continue;
+
             var revealResult = game.RevealCell(pos, out var affectedCells);
             Assert.True(revealResult.IsSuccess || revealResult == OperationResults.GameWon);
             Assert.NotNull(affectedCells);
@@ -154,5 +157,38 @@ public sealed class GameTests
         Assert.Equal(OperationResults.GameOver, result);
         Assert.NotNull(affectedCells);
         Assert.Contains(affectedCells, c => c.Position.Equals(minePos.Value));
+    }
+
+    [Fact]
+    public void RevealObviousNeighborCells_RevealsUnflaggedUnrevealedNeighbors_WhenFlagCountMatches()
+    {
+        // Arrange: 3x3 board, 1 mine
+        var game = Game.Create(3, 3, 1, Shared.Random);
+
+        // Find a cell with at least one neighbor mine
+        var targetCell = game.Board.GetAllCells().FirstOrDefault(cell =>
+            !cell.IsMine && game.Board.GetNeighborCells(cell.Position).Any(n => n.IsMine));
+
+        Assert.NotNull(targetCell);
+
+        // Flag all neighboring mines
+        foreach (var neighbor in game.Board.GetNeighborCells(targetCell.Position))
+        {
+            if (neighbor.IsMine)
+                game.ToggleFlag(neighbor.Position);
+        }
+
+        // Reveal the target cell
+        game.RevealCell(targetCell.Position);
+
+        // Act: Reveal obvious neighbors
+        game.RevealObviousNeighborCells(targetCell.Position, out var affectedCells);
+
+        // Assert: All unflagged, unrevealed neighbors are revealed
+        foreach (var neighbor in game.Board.GetNeighborCells(targetCell.Position))
+        {
+            if (neighbor is { IsMine: false, IsFlagged: false })
+                Assert.Contains(affectedCells, c => c.Position.Equals(neighbor.Position));
+        }
     }
 }

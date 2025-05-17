@@ -112,6 +112,11 @@ public sealed class Board
 
         var cell = Cells[position.Row, position.Column];
 
+        RevealCell(cell, out affectedCells);
+    }
+
+    public void RevealCell(Cell cell, out IReadOnlyCollection<Cell> affectedCells)
+    {
         if (cell.IsRevealed || cell.IsFlagged)
         {
             affectedCells = [];

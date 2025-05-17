@@ -54,6 +54,43 @@ public sealed class Game
         return OperationResult.Success;
     }
 
+    public void RevealObviousNeighborCells(in Position revealedCellPosition,
+        out IReadOnlyCollection<Cell> affectedCells)
+    {
+        var cell = Board.GetCell(revealedCellPosition);
+
+        // Only proceed if the cell is revealed and has at least one neighbor mine
+        if (cell is not { IsRevealed: true, NeighborMinesCount: > 0 })
+        {
+            affectedCells = [];
+            return;
+        }
+
+        var neighbors = Board.GetNeighborCells(revealedCellPosition).ToList();
+
+        var flaggedCount = neighbors.Count(n => n.IsFlagged);
+
+        // Only reveal neighbors if the number of flagged cells equals the neighbor mine count
+        if (flaggedCount != cell.NeighborMinesCount)
+        {
+            affectedCells = [];
+            return;
+        }
+
+        var affectedCellsSet = new HashSet<Cell>();
+
+        foreach (var neighbor in neighbors)
+        {
+            if (neighbor is not { IsRevealed: false, IsFlagged: false } || affectedCellsSet.Contains(neighbor))
+                continue;
+
+            Board.RevealCell(neighbor, out var currentAffectedCells);
+            affectedCellsSet.UnionWith(currentAffectedCells);
+        }
+
+        affectedCells = affectedCellsSet;
+    }
+
     public OperationResult ToggleFlag(in Position position)
     {
         var cell = Board[position];
