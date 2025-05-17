@@ -1,8 +1,8 @@
-namespace MineSweeper.GameWindow;
+namespace MineSweeper;
 
-sealed partial class Game
+sealed partial class GameWindow
 {
-    public Game()
+    public GameWindow()
     {
         InitializeComponent();
     }
@@ -11,7 +11,7 @@ sealed partial class Game
         System.Windows.DependencyProperty.Register(
             nameof(RowsCount),
             typeof(int),
-            typeof(Game),
+            typeof(GameWindow),
             new System.Windows.PropertyMetadata(0));
 
     public int RowsCount
@@ -24,7 +24,7 @@ sealed partial class Game
         System.Windows.DependencyProperty.Register(
             nameof(ColumnsCount),
             typeof(int),
-            typeof(Game),
+            typeof(GameWindow),
             new System.Windows.PropertyMetadata(0));
 
     public int ColumnsCount
@@ -37,7 +37,7 @@ sealed partial class Game
         System.Windows.DependencyProperty.Register(
             nameof(MinesCount),
             typeof(int),
-            typeof(Game),
+            typeof(GameWindow),
             new System.Windows.PropertyMetadata(0));
 
     public int MinesCount

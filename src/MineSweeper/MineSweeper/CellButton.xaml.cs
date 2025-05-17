@@ -2,7 +2,7 @@ using System.Windows;
 using CommunityToolkit.Mvvm.Messaging;
 using MineSweeper.Domain;
 
-namespace MineSweeper.GameWindow;
+namespace MineSweeper;
 
 /// <summary>
 /// Interaction logic for CellButton.xaml

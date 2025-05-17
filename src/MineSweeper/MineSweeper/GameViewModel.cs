@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using MineSweeper.Domain;
 using DomainGame = MineSweeper.Domain.Game;
 
-namespace MineSweeper.GameWindow;
+namespace MineSweeper;
 
 public sealed class GameViewModel : ObservableObject
 {

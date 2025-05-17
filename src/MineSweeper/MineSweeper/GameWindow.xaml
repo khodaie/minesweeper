@@ -1,9 +1,9 @@
-<Window x:Class="MineSweeper.GameWindow.Game"
+<Window x:Class="MineSweeper.GameWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:local="clr-namespace:MineSweeper.GameWindow"
+        xmlns:mineSweeper="clr-namespace:MineSweeper"
         x:Name="TheGame"
         mc:Ignorable="d"
         Title="Game" Height="512" Width="512">
@@ -26,10 +26,10 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions >
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        <ColumnDefinition />
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="1*" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Mines Count:" Style="{StaticResource LabelStyle}" />
                     <TextBlock Text="{Binding ElementName=TheGameControl, Path=MinesCount}" Grid.Row="0" Grid.Column="1" />
@@ -39,7 +39,7 @@
             </StackPanel>
 
         </Border>
-        <local:GameControl x:Name="TheGameControl" Grid.Row="1"
+        <mineSweeper:GameControl x:Name="TheGameControl" Grid.Row="1"
                            RowsCount="{Binding RowsCount, ElementName=TheGame}"
                            ColumnsCount="{Binding ColumnsCount, ElementName=TheGame}"
                            MinesCount="{Binding MinesCount, ElementName=TheGame}" />

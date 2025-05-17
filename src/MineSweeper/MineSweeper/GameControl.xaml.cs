@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 
-namespace MineSweeper.GameWindow;
+namespace MineSweeper;
 
 sealed partial class GameControl
 {

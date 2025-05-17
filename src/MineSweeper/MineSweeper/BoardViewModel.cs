@@ -1,9 +1,9 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using MineSweeper.Domain;
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using MineSweeper.Domain;
 
-namespace MineSweeper.GameWindow;
+namespace MineSweeper;
 
 public sealed class BoardViewModel : ObservableObject
 {

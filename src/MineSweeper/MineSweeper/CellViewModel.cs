@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MineSweeper.Domain;
 
-namespace MineSweeper.GameWindow;
+namespace MineSweeper;
 
 public sealed class CellViewModel : ObservableObject
 {

@@ -1,4 +1,4 @@
-namespace MineSweeper.GameWindow;
+namespace MineSweeper;
 
 public sealed record GameInfo
 {

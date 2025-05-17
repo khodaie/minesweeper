@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Windows.Data;
 using MineSweeper.Domain;
 
-namespace MineSweeper.GameWindow;
+namespace MineSweeper;
 
 public sealed class CellContentConverter : IValueConverter
 {
