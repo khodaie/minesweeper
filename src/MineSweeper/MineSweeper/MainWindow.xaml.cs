@@ -1,4 +1,6 @@
 using System.Windows;
+using System.Windows.Controls;
+using MineSweeper.GameWindow;
 
 namespace MineSweeper;
 
@@ -13,9 +15,23 @@ sealed partial class MainWindow
     {
     }
 
-    private void StartButton_OnClick(object sender, RoutedEventArgs e)
+    private void StartGameButton_OnClick(object sender, RoutedEventArgs e)
     {
-        var window = new GameWindow.Game();
+        if (sender is not Button { Tag: GameInfo gameInfo })
+            return;
+
+        CreateGame(gameInfo);
+    }
+
+    private void CreateGame(GameInfo gameInfo)
+    {
+        var window = new Game
+        {
+            RowsCount = gameInfo.RowsCount,
+            ColumnsCount = gameInfo.ColumnsCount,
+            MinesCount = gameInfo.MinesCount
+        };
+
         window.Closed += GameWindowOnClosed;
         Hide();
         window.Show();

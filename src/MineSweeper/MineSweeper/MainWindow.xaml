@@ -4,15 +4,57 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MineSweeper"
+        xmlns:gameWindow="clr-namespace:MineSweeper.GameWindow"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800"
         Loaded="Window_Loaded">
-    <Grid>
-        <Button Content="Start" Name="StartButton" Click="StartButton_OnClick"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Top"
-                Margin="16"
-                Padding="16"
-                />
-    </Grid>
+    <Window.Resources>
+        <Style x:Key="StartButtonStyle" TargetType="Button">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Margin" Value="16" />
+            <Setter Property="Padding" Value="16" />
+        </Style>
+    </Window.Resources>
+    <StackPanel>
+        <Button Content="Beginner"
+                Click="StartGameButton_OnClick"
+                Style="{StaticResource StartButtonStyle}" >
+            <Button.Tag>
+                <gameWindow:GameInfo RowsCount="16" ColumnsCount="16" MinesCount="8" />
+            </Button.Tag>
+        </Button>
+
+        <Button Content="Intermediate"
+                Click="StartGameButton_OnClick"
+                Style="{StaticResource StartButtonStyle}" >
+            <Button.Tag>
+                <gameWindow:GameInfo RowsCount="24" ColumnsCount="24" MinesCount="32" />
+            </Button.Tag>
+        </Button>
+
+        <Button Content="Advanced"
+                Click="StartGameButton_OnClick"
+                Style="{StaticResource StartButtonStyle}" >
+            <Button.Tag>
+                <gameWindow:GameInfo RowsCount="32" ColumnsCount="32" MinesCount="96" />
+            </Button.Tag>
+        </Button>
+
+        <Button Content="Expert"
+                Click="StartGameButton_OnClick"
+                Style="{StaticResource StartButtonStyle}" >
+            <Button.Tag>
+                <gameWindow:GameInfo RowsCount="48" ColumnsCount="48" MinesCount="256" />
+            </Button.Tag>
+        </Button>
+
+        <Button Content="God Mode"
+                Click="StartGameButton_OnClick"
+                Style="{StaticResource StartButtonStyle}" >
+            <Button.Tag>
+                <gameWindow:GameInfo RowsCount="64" ColumnsCount="64" MinesCount="1024" />
+            </Button.Tag>
+        </Button>
+    </StackPanel>
 </Window>

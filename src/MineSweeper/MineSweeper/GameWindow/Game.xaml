@@ -4,9 +4,44 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:MineSweeper.GameWindow"
+        x:Name="TheGame"
         mc:Ignorable="d"
         Title="Game" Height="512" Width="512">
+    <Window.Resources>
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,0,4,0" />
+        </Style>
+    </Window.Resources>
     <Grid>
-        <local:GameControl />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Border>
+            <StackPanel Orientation="Vertical" Margin="4">
+                <TextBlock Text="Mine Sweeper" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions >
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Mines Count:" Style="{StaticResource LabelStyle}" />
+                    <TextBlock Text="{Binding ElementName=TheGameControl, Path=MinesCount}" Grid.Row="0" Grid.Column="1" />
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Remaining Mines Count:" Style="{StaticResource LabelStyle}" />
+                    <TextBlock Text="{Binding ElementName=TheGameControl, Path=ViewModel.UnrevealedMinesCount, FallbackValue=0}"  Grid.Row="0" Grid.Column="3" />
+                </Grid>
+            </StackPanel>
+
+        </Border>
+        <local:GameControl x:Name="TheGameControl" Grid.Row="1"
+                           RowsCount="{Binding RowsCount, ElementName=TheGame}"
+                           ColumnsCount="{Binding ColumnsCount, ElementName=TheGame}"
+                           MinesCount="{Binding MinesCount, ElementName=TheGame}" />
     </Grid>
 </Window>

@@ -11,7 +11,5 @@
              DataContext="{Binding ViewModel, ElementName=TheGameUserControl}"
              Loaded="GameControl_Loaded"
              Unloaded="GameControl_OnUnloaded">
-    <Grid Name="GameGrid">
-
-    </Grid>
+    <Grid Name="GameGrid" />
 </UserControl>

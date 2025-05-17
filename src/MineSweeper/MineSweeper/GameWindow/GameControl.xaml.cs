@@ -1,6 +1,5 @@
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using CommunityToolkit.Mvvm.Messaging;
 
 namespace MineSweeper.GameWindow;
@@ -9,18 +8,27 @@ sealed partial class GameControl
 {
     private const int CellSize = 16;
 
-    // Using a DependencyProperty as the backing store for RowsCount.  This enables animation, styling, binding, etc...
     public static readonly DependencyProperty RowsCountProperty =
-        DependencyProperty.Register(nameof(RowsCount), typeof(int), typeof(GameControl), new UIPropertyMetadata(0));
+        DependencyProperty.Register(nameof(RowsCount), typeof(int), typeof(GameControl),
+            new UIPropertyMetadata(0, static (s, _) => ((GameControl)s).Render()));
 
     public static readonly DependencyProperty ColumnsCountProperty =
-        DependencyProperty.Register(nameof(ColumnsCount), typeof(int), typeof(GameControl), new PropertyMetadata(0));
+        DependencyProperty.Register(nameof(ColumnsCount), typeof(int), typeof(GameControl),
+            new PropertyMetadata(0, static (s, _) => ((GameControl)s).Render()));
 
-    // Using a DependencyProperty as the backing store for MinesCount.  This enables animation, styling, binding, etc...
     public static readonly DependencyProperty MinesCountProperty =
-        DependencyProperty.Register(nameof(MinesCount), typeof(int), typeof(GameControl), new PropertyMetadata(0));
+        DependencyProperty.Register(nameof(MinesCount), typeof(int), typeof(GameControl),
+            new PropertyMetadata(0, static (s, _) => ((GameControl)s).Render()));
 
-    public GameViewModel ViewModel { get; }
+    public GameViewModel? ViewModel
+    {
+        get => (GameViewModel?)GetValue(ViewModelProperty);
+        set => SetValue(ViewModelProperty, value);
+    }
+
+    public static readonly DependencyProperty ViewModelProperty =
+        DependencyProperty.Register(nameof(ViewModel), typeof(GameViewModel), typeof(GameControl),
+            new UIPropertyMetadata(defaultValue: null));
 
     public int RowsCount
     {
@@ -43,12 +51,20 @@ sealed partial class GameControl
     public GameControl()
     {
         InitializeComponent();
+    }
 
-        ViewModel = new GameViewModel(new GameInfo(16, 24, 16), WeakReferenceMessenger.Default);
+    private void Render()
+    {
+        if (RowsCount <= 0 || ColumnsCount <= 0 || MinesCount <= 0)
+        {
+            ViewModel = null;
+            return;
+        }
 
-        SetBinding(RowsCountProperty, new Binding(nameof(ViewModel.Board.RowsCount)) { Source = ViewModel });
-        SetBinding(ColumnsCountProperty, new Binding(nameof(ViewModel.Board.ColumnsCount)) { Source = ViewModel });
-        SetBinding(MinesCountProperty, new Binding(nameof(ViewModel.MinesCount)) { Source = ViewModel });
+        ViewModel = new GameViewModel(new GameInfo(RowsCount, ColumnsCount, MinesCount),
+            WeakReferenceMessenger.Default);
+
+        CreateBoard();
     }
 
     private void OnGameOver(object recipient, GameOverMessage message)
@@ -65,26 +81,29 @@ sealed partial class GameControl
 
     private void CreateBoard()
     {
+        if (ViewModel is not { } viewModel)
+            return;
+
         GameGrid.ColumnDefinitions.Clear();
         GameGrid.RowDefinitions.Clear();
         GameGrid.Children.Clear();
-        GameGrid.DataContext = ViewModel.Game;
+        GameGrid.DataContext = viewModel.Game;
 
-        for (var j = 0; j < ViewModel.Board.ColumnsCount; j++)
+        for (var j = 0; j < viewModel.Board.ColumnsCount; j++)
         {
             GameGrid.ColumnDefinitions.Add(new ColumnDefinition { MinWidth = CellSize });
         }
 
-        for (var i = 0; i < ViewModel.Board.RowsCount; i++)
+        for (var i = 0; i < viewModel.Board.RowsCount; i++)
         {
             GameGrid.RowDefinitions.Add(new RowDefinition { MinHeight = CellSize });
         }
 
-        for (var i = 0; i < ViewModel.Board.RowsCount; i++)
+        for (var i = 0; i < viewModel.Board.RowsCount; i++)
         {
-            for (var j = 0; j < ViewModel.Board.ColumnsCount; j++)
+            for (var j = 0; j < viewModel.Board.ColumnsCount; j++)
             {
-                var cell = ViewModel.Board.GetCell(row: i, column: j);
+                var cell = viewModel.Board.GetCell(row: i, column: j);
                 var button = new CellButton
                 {
                     ViewModel = cell
@@ -99,8 +118,6 @@ sealed partial class GameControl
 
     private void GameControl_Loaded(object sender, RoutedEventArgs e)
     {
-        CreateBoard();
-
         WeakReferenceMessenger.Default.Register<GameWonMessage>(this, OnGameWon);
         WeakReferenceMessenger.Default.Register<GameOverMessage>(this, OnGameOver);
     }

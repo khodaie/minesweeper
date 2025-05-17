@@ -5,8 +5,6 @@ using DomainGame = MineSweeper.Domain.Game;
 
 namespace MineSweeper.GameWindow;
 
-public sealed record GameInfo(int Rows, int Columns, int Mines);
-
 public sealed class GameViewModel : ObservableObject
 {
     private readonly IMessenger _messenger;
@@ -16,11 +14,13 @@ public sealed class GameViewModel : ObservableObject
 
     public int MinesCount => Game.MinesCount;
 
+    public int UnrevealedMinesCount => Game.Board.GetUnrevealedMinesCount();
+
     public GameState State => Game.State;
 
     public GameViewModel(GameInfo gameInfo, IMessenger messenger)
     {
-        Game = DomainGame.Create(gameInfo.Rows, gameInfo.Columns, gameInfo.Mines);
+        Game = DomainGame.Create(gameInfo.RowsCount, gameInfo.ColumnsCount, gameInfo.MinesCount);
         Board = new BoardViewModel(Game.Board, messenger);
         _messenger = messenger;
 
@@ -30,7 +30,7 @@ public sealed class GameViewModel : ObservableObject
 
     private void Refresh() => RefreshCells(Board.Cells);
 
-    private static void RefreshCells(params IEnumerable<CellViewModel> cells)
+    private void RefreshCells(params IEnumerable<CellViewModel> cells)
     {
         foreach (var cell in cells)
         {
@@ -59,6 +59,8 @@ public sealed class GameViewModel : ObservableObject
         if (affectedCells.Count != 0)
             RefreshCells(affectedCells.Select(c => Board.GetCell(c.Position)));
 
+        OnPropertyChanged(nameof(UnrevealedMinesCount));
+
         HandleGameResult(operationResult);
     }
 
@@ -67,6 +69,8 @@ public sealed class GameViewModel : ObservableObject
         var operationResult = Game.ToggleFlag(message.Cell.Position);
 
         RefreshCells(message.Cell);
+
+        OnPropertyChanged(nameof(UnrevealedMinesCount));
 
         HandleGameResult(operationResult);
     }

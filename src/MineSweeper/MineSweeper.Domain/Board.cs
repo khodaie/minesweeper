@@ -157,6 +157,9 @@ public sealed class Board
     {
         ArgumentNullException.ThrowIfNull(random);
 
+        if (minesCount == 0)
+            return;
+
         if (minesCount >= RowsCount * ColumnsCount)
             throw new ArgumentException("The number of the mines should be less than the number of the cells.",
                 nameof(minesCount));
@@ -201,4 +204,7 @@ public sealed class Board
     }
 
     private void ValidatePosition(in Position position) => position.Validate(RowsCount, ColumnsCount);
+
+    public int GetUnrevealedMinesCount() =>
+        GetAllCells().Count(c => c is { IsRevealed: false, IsFlagged: false, IsMine: true });
 }
