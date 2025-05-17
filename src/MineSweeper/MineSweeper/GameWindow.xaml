@@ -6,7 +6,10 @@
         xmlns:mineSweeper="clr-namespace:MineSweeper"
         x:Name="TheGame"
         mc:Ignorable="d"
-        Title="Game" Height="512" Width="512">
+        Title="Mine Sweeper"
+        Icon="pack://application:,,,/Resources/minesweeper.ico"
+        Height="512" Width="512"
+        WindowStyle="SingleBorderWindow">
     <Window.Resources>
         <Style x:Key="LcdTextBlockStyle" TargetType="TextBlock">
             <Setter Property="Foreground" Value="#FF00FF00" />
@@ -36,11 +39,9 @@
             <StackPanel Orientation="Vertical" Margin="4">
                 <TextBlock Text="Mine Sweeper" FontSize="24" Style="{StaticResource LcdTextBlockStyle}" />
                 <Grid Margin="8">
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="3*" />
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="3*" />
@@ -56,6 +57,10 @@
                         Text="{Binding ElementName=TheGameControl, Path=ViewModel.UnrevealedMinesCount, FallbackValue=0}"
                         Grid.Row="0" Grid.Column="3"
                         Style="{StaticResource LcdTextBlockStyle}" />
+                    <TextBlock Grid.Row="0" Grid.Column="4" Text="Time:" Style="{StaticResource LabelStyle}" />
+                    <TextBlock Grid.Row="0" Grid.Column="5"
+                               Text="{Binding ElementName=TheGameControl, Path=ViewModel.ElapsedTime, StringFormat={}{0:mm\\:ss}, FallbackValue=00:00}"
+                               Style="{StaticResource LcdTextBlockStyle}" />
                 </Grid>
             </StackPanel>
 

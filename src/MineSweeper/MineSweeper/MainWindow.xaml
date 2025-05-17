@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MineSweeper"
         mc:Ignorable="d"
-        Title="MainWindow" Height="512" Width="318" ResizeMode="CanMinimize">
+        Title="Mine Sweeper" Height="512" Width="318" ResizeMode="CanMinimize"
+        Icon="pack://application:,,,/Resources/minesweeper.ico">
     <Window.Resources>
         <Style x:Key="StartButtonStyle" TargetType="Button">
             <Setter Property="HorizontalAlignment" Value="Stretch" />
