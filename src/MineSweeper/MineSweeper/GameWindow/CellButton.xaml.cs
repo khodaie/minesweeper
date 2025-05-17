@@ -1,4 +1,6 @@
 using System.Windows;
+using CommunityToolkit.Mvvm.Messaging;
+using MineSweeper.Domain;
 
 namespace MineSweeper.GameWindow;
 
@@ -10,6 +12,16 @@ sealed partial class CellButton
     public CellButton()
     {
         InitializeComponent();
+
+#if DEBUG
+        if (System.ComponentModel.DesignerProperties.GetIsInDesignMode(this))
+        {
+            // Mock Cell and ViewModel for design-time data
+            var mockCell = Cell.CreateInstance(0, 0);
+
+            ViewModel = new CellViewModel(mockCell, WeakReferenceMessenger.Default);
+        }
+#endif
     }
 
     public CellViewModel ViewModel
@@ -18,7 +30,6 @@ sealed partial class CellButton
         init => SetValue(ViewModelProperty, value);
     }
 
-    // Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc...
     public static readonly DependencyProperty ViewModelProperty =
         DependencyProperty.Register(nameof(ViewModel), typeof(CellViewModel), typeof(CellButton),
             new UIPropertyMetadata(null));

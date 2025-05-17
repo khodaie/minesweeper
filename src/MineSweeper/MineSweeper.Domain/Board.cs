@@ -84,19 +84,8 @@ public sealed class Board
     }
 
     [Pure]
-    public int GetAdjacentMinesCount(in Position position)
-    {
-        var count = 0;
-        foreach (var adjacentCell in GetNeighborCells(position))
-        {
-            if (adjacentCell.IsMine)
-            {
-                count++;
-            }
-        }
-
-        return count;
-    }
+    public int GetAdjacentMinesCount(in Position position) =>
+        GetNeighborCells(position).Count(adjacentCell => adjacentCell.IsMine);
 
     [Pure]
     public int GetUnrevealedCellsCount()
@@ -107,7 +96,7 @@ public sealed class Board
         {
             for (var column = 0; column < ColumnsCount; column++)
             {
-                if (!Cells[row, column].IsRevealed)
+                if (Cells[row, column] is { IsRevealed: false })
                 {
                     count++;
                 }
@@ -140,10 +129,11 @@ public sealed class Board
         {
             for (var column = 0; column < ColumnsCount; column++)
             {
-                var cell = Cells[row, column];
-                if (cell is { IsRevealed: false, IsFlagged: false })
+                switch (Cells[row, column])
                 {
-                    return false;
+                    case { IsRevealed: false, IsFlagged: false }:
+                    case { IsFlagged: true, IsMine: false }:
+                        return false;
                 }
             }
         }

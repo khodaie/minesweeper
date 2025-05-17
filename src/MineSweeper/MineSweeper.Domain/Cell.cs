@@ -26,7 +26,7 @@ public sealed class Cell
         Position = position;
     }
 
-    internal static Cell CreateInstance(int row, int column) => new(new Position(row, column));
+    public static Cell CreateInstance(int row, int column) => new(new Position(row, column));
 
     internal void Reveal()
     {
@@ -41,7 +41,13 @@ public sealed class Cell
         if (IsRevealed)
             return;
 
-        State = State == CellState.Flagged ? CellState.Hidden : CellState.Flagged;
+        State = State switch
+        {
+            CellState.Flagged => CellState.QuestionMarked,
+            CellState.QuestionMarked => CellState.Hidden,
+            CellState.Hidden => CellState.Flagged,
+            _ => State
+        };
     }
 
     internal void PlaceMine()

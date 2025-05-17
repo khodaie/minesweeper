@@ -49,6 +49,7 @@ public sealed class CellViewModel : ObservableObject
         OnPropertyChanged(nameof(IsFlagged));
         OnPropertyChanged(nameof(Cell));
         OnPropertyChanged(nameof(IsExploded));
+        OnPropertyChanged(nameof(IsQuestionMarked));
 
         _revealCellCommand.NotifyCanExecuteChanged();
         _toggleFlagCommand.NotifyCanExecuteChanged();

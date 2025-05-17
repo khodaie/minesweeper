@@ -94,11 +94,6 @@ public sealed class Game
 
     private void Win()
     {
-        if (State != GameState.InProgress)
-        {
-            throw new InvalidOperationException("Game is not in progress.");
-        }
-
         State = GameState.Won;
     }
 }
