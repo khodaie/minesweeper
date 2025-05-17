@@ -11,7 +11,7 @@ public sealed class Cell
 
     public bool IsMine { get; private set; }
 
-    public int NeighborMinesCount { get; private set; }
+    public sbyte NeighborMinesCount { get; private set; }
 
     public bool IsRevealed => State is CellState.Revealed or CellState.IsExploded or CellState.MineRevealed;
 
@@ -26,7 +26,9 @@ public sealed class Cell
         Position = position;
     }
 
-    public static Cell CreateInstance(int row, int column) => new(new Position(row, column));
+    public static Cell CreateInstance(int row, int column) => CreateInstance(new Position(row, column));
+
+    public static Cell CreateInstance(in Position position) => new(position);
 
     internal void Reveal()
     {
@@ -71,6 +73,12 @@ public sealed class Cell
     {
         if (State is not CellState.Hidden)
             throw new InvalidOperationException("Cannot set neighbor mines count on a revealed or flagged cell.");
+
+        if (IsMine)
+            throw new InvalidOperationException("This cell is already a mine.");
+
+        if (NeighborMinesCount >= 8)
+            throw new InvalidOperationException("Cannot increase neighbor mines count beyond 8.");
 
         NeighborMinesCount++;
     }

@@ -30,7 +30,7 @@ public sealed class GameViewModel : ObservableObject
 
     private void Refresh() => RefreshCells(Board.Cells);
 
-    private void RefreshCells(params IEnumerable<CellViewModel> cells)
+    private static void RefreshCells(params IEnumerable<CellViewModel> cells)
     {
         foreach (var cell in cells)
         {

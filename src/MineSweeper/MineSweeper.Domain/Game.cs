@@ -31,6 +31,8 @@ public sealed class Game
         return game;
     }
 
+    public OperationResult RevealCell(in Position position) => RevealCell(in position, out _);
+
     public OperationResult RevealCell(in Position position, out IReadOnlyCollection<Cell> affectedCells)
     {
         var cell = Board[position];
