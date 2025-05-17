@@ -1,6 +1,3 @@
-using System.Globalization;
-using System.Reflection;
-using MineSweeper.Domain;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -25,8 +22,6 @@ sealed partial class GameControl
 
     public GameViewModel ViewModel { get; }
 
-    private Button[,]? _buttons;
-
     public int RowsCount
     {
         get => (int)GetValue(RowsCountProperty);
@@ -45,17 +40,14 @@ sealed partial class GameControl
         set => SetValue(MinesCountProperty, value);
     }
 
-    private Button[,] Buttons => _buttons ?? throw new InvalidOperationException();
-
     public GameControl()
     {
         InitializeComponent();
 
-        ViewModel = new GameViewModel(new GameInfo(24, 24, 4), WeakReferenceMessenger.Default);
+        ViewModel = new GameViewModel(new GameInfo(16, 24, 16), WeakReferenceMessenger.Default);
 
         SetBinding(RowsCountProperty, new Binding(nameof(ViewModel.Board.RowsCount)) { Source = ViewModel });
-        SetBinding(ColumnsCountProperty,
-            new Binding(nameof(ViewModel.Board.ColumnsCount)) { Source = ViewModel });
+        SetBinding(ColumnsCountProperty, new Binding(nameof(ViewModel.Board.ColumnsCount)) { Source = ViewModel });
         SetBinding(MinesCountProperty, new Binding(nameof(ViewModel.MinesCount)) { Source = ViewModel });
     }
 
@@ -88,38 +80,19 @@ sealed partial class GameControl
             GameGrid.RowDefinitions.Add(new RowDefinition { MinHeight = CellSize });
         }
 
-        _buttons = new Button[ViewModel.Board.RowsCount, ViewModel.Board.ColumnsCount];
-
-        var cellConverter = new CellContentConverter();
-
         for (var i = 0; i < ViewModel.Board.RowsCount; i++)
         {
             for (var j = 0; j < ViewModel.Board.ColumnsCount; j++)
             {
-                var cell = ViewModel.Board.GetCell(new Position(i, j));
-                var button = new MineCellButton
+                var cell = ViewModel.Board.GetCell(row: i, column: j);
+                var button = new CellButton
                 {
-                    Background = System.Windows.Media.Brushes.LightGray,
-                    DataContext = cell,
-                    CommandParameter = cell,
-                    LeftClickCommand = ViewModel.RevealCellCommand,
-                    RightClickCommand = ViewModel.FlagCommand
+                    ViewModel = cell
                 };
-
-                button.SetBinding(ContentProperty,
-                    new Binding(nameof(cell.Cell))
-                    {
-                        Source = cell,
-                        Converter = cellConverter,
-                        ConverterCulture = CultureInfo.CurrentUICulture,
-                        ConverterParameter = ViewModel,
-                        Mode = BindingMode.OneWay
-                    });
 
                 Grid.SetRow(button, i);
                 Grid.SetColumn(button, j);
                 GameGrid.Children.Add(button);
-                _buttons[i, j] = button;
             }
         }
     }

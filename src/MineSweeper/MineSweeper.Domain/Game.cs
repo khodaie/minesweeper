@@ -84,6 +84,12 @@ public sealed class Game
         }
 
         State = GameState.GameOver;
+
+        foreach (var cell in Board.GetAllCells())
+        {
+            if (cell is { IsRevealed: false, IsMine: true })
+                cell.RevealMine();
+        }
     }
 
     private void Win()

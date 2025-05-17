@@ -196,7 +196,10 @@ public sealed class Board
         cell.Reveal();
 
         if (cell.IsMine)
+        {
+            handledCells.Add(cell);
             return;
+        }
 
         if (cell.NeighborMinesCount == 0)
         {

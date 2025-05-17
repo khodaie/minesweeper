@@ -13,9 +13,13 @@ public sealed class Cell
 
     public int NeighborMinesCount { get; private set; }
 
-    public bool IsRevealed => State == CellState.Revealed;
+    public bool IsRevealed => State is CellState.Revealed or CellState.IsExploded or CellState.MineRevealed;
 
     public bool IsFlagged => State == CellState.Flagged;
+
+    public bool IsQuestionMarked => State == CellState.QuestionMarked;
+
+    public bool IsExploded => State == CellState.IsExploded;
 
     private Cell(in Position position)
     {
@@ -24,15 +28,15 @@ public sealed class Cell
 
     internal static Cell CreateInstance(int row, int column) => new(new Position(row, column));
 
-    public void Reveal()
+    internal void Reveal()
     {
         if (IsRevealed || IsFlagged)
             return;
 
-        State = CellState.Revealed;
+        State = IsMine ? CellState.IsExploded : CellState.Revealed;
     }
 
-    public void ToggleFlag()
+    internal void ToggleFlag()
     {
         if (IsRevealed)
             return;
@@ -47,6 +51,14 @@ public sealed class Cell
 
         IsMine = true;
         NeighborMinesCount = -1;
+    }
+
+    internal void RevealMine()
+    {
+        if (IsRevealed || !IsMine)
+            return;
+
+        State = CellState.MineRevealed;
     }
 
     internal void IncreaseNeighborMinesCount()

@@ -1,8 +1,11 @@
-﻿namespace MineSweeper.Domain;
+namespace MineSweeper.Domain;
 
 public enum CellState
 {
     Hidden,
     Revealed,
-    Flagged
+    Flagged,
+    QuestionMarked,
+    IsExploded,
+    MineRevealed
 }
