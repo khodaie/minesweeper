@@ -1,0 +1,123 @@
+<Window x:Class="MineSweeper.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MineSweeper"
+        mc:Ignorable="d"
+        Title="Mine Sweeper" Height="512" Width="318" ResizeMode="CanMinimize"
+        Icon="pack://application:,,,/Resources/minesweeper.ico">
+    <Window.Resources>
+        <Style x:Key="StartButtonStyle" TargetType="Button">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Margin" Value="16" />
+            <Setter Property="Padding" Value="16" />
+        </Style>
+    </Window.Resources>
+    <StackPanel>
+        <!-- Beginner: 9x9, 10 mines -->
+        <Button               Click="StartGameButton_OnClick"
+                Style="{StaticResource StartButtonStyle}">
+            <Button.Tag>
+                <local:GameInfo RowsCount="9" ColumnsCount="9" MinesCount="10" />
+            </Button.Tag>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Viewbox Width="24" Height="24" Margin="0,0,8,0">
+                    <!-- Simple smiley face for Beginner -->
+                    <Canvas Width="24" Height="24">
+                        <Ellipse Width="20" Height="20" Canvas.Left="2" Canvas.Top="2" Stroke="Black" Fill="Yellow"/>
+                        <Ellipse Width="3" Height="3" Canvas.Left="7" Canvas.Top="8" Fill="Black"/>
+                        <Ellipse Width="3" Height="3" Canvas.Left="14" Canvas.Top="8" Fill="Black"/>
+                        <Path Stroke="Black" StrokeThickness="1" Data="M7,15 Q12,19 17,15"/>
+                    </Canvas>
+                </Viewbox>
+                <TextBlock Text="Beginner" VerticalAlignment="Center" FontSize="16"/>
+            </StackPanel>
+        </Button>
+
+        <!-- Intermediate: 16x16, 40 mines -->
+        <Button               Click="StartGameButton_OnClick"
+                Style="{StaticResource StartButtonStyle}">
+            <Button.Tag>
+                <local:GameInfo RowsCount="16" ColumnsCount="16" MinesCount="40" />
+            </Button.Tag>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Viewbox Width="24" Height="24" Margin="0,0,8,0">
+                    <!-- Stopwatch for Intermediate -->
+                    <Canvas Width="24" Height="24">
+                        <Ellipse Width="18" Height="18" Canvas.Left="3" Canvas.Top="3" Stroke="Black" Fill="#FFD3D3D3"/>
+                        <Rectangle Width="4" Height="6" Canvas.Left="10" Canvas.Top="0" Fill="Black"/>
+                        <Path Stroke="Black" StrokeThickness="2" Data="M12,12 L12,7"/>
+                        <Path Stroke="Black" StrokeThickness="2" Data="M12,12 L16,12"/>
+                    </Canvas>
+                </Viewbox>
+                <TextBlock Text="Intermediate" VerticalAlignment="Center" FontSize="16"/>
+            </StackPanel>
+        </Button>
+
+        <!-- Advanced: 24x24, 99 mines -->
+        <Button
+                Click="StartGameButton_OnClick"
+                Style="{StaticResource StartButtonStyle}">
+            <Button.Tag>
+                <local:GameInfo RowsCount="24" ColumnsCount="24" MinesCount="99" />
+            </Button.Tag>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Viewbox Width="24" Height="24" Margin="0,0,8,0">
+                    <!-- Bomb for Advanced -->
+                    <Canvas Width="24" Height="24">
+                        <Ellipse Width="16" Height="16" Canvas.Left="4" Canvas.Top="4" Stroke="Black" Fill="Black"/>
+                        <Path Stroke="Orange" StrokeThickness="2" Data="M12,4 L12,0"/>
+                        <Ellipse Width="4" Height="4" Canvas.Left="10" Canvas.Top="0" Fill="Gray"/>
+                        <Path Stroke="Red" StrokeThickness="1" Data="M12,0 Q13,2 14,0"/>
+                        <Path Stroke="Red" StrokeThickness="1" Data="M12,0 Q11,2 10,0"/>
+                    </Canvas>
+                </Viewbox>
+                <TextBlock Text="Advanced" VerticalAlignment="Center" FontSize="16"/>
+            </StackPanel>
+        </Button>
+
+        <!-- Expert: 32x32, 180 mines -->
+        <Button
+                Click="StartGameButton_OnClick"
+                Style="{StaticResource StartButtonStyle}">
+            <Button.Tag>
+                <local:GameInfo RowsCount="32" ColumnsCount="32" MinesCount="180" />
+            </Button.Tag>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Viewbox Width="24" Height="24" Margin="0,0,8,0">
+                    <!-- Star for Expert -->
+                    <Canvas Width="24" Height="24">
+                        <Path Fill="Gold" Stroke="Black" StrokeThickness="1"
+                              Data="M12,2 L14,9 H21 L15,13 L17,20 L12,16 L7,20 L9,13 L3,9 H10 Z"/>
+                    </Canvas>
+                </Viewbox>
+                <TextBlock Text="Expert" VerticalAlignment="Center" FontSize="16"/>
+            </StackPanel>
+        </Button>
+
+        <!-- God Mode: 64x64, 512 mines -->
+        <Button
+                Click="StartGameButton_OnClick"
+                Style="{StaticResource StartButtonStyle}">
+            <Button.Tag>
+                <local:GameInfo RowsCount="64" ColumnsCount="64" MinesCount="512" />
+            </Button.Tag>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Viewbox Width="24" Height="24" Margin="0,0,8,0">
+                    <!-- Crown for God Mode -->
+                    <Canvas Width="24" Height="24">
+                        <Path Fill="Gold" Stroke="Black" StrokeThickness="1"
+                              Data="M2,18 L6,8 L12,14 L18,8 L22,18 Z"/>
+                        <Rectangle Width="20" Height="4" Canvas.Left="2" Canvas.Top="18" Fill="Gold" Stroke="Black" StrokeThickness="1"/>
+                        <Ellipse Width="2" Height="2" Canvas.Left="5" Canvas.Top="6" Fill="Red"/>
+                        <Ellipse Width="2" Height="2" Canvas.Left="11" Canvas.Top="12" Fill="Blue"/>
+                        <Ellipse Width="2" Height="2" Canvas.Left="17" Canvas.Top="6" Fill="Green"/>
+                    </Canvas>
+                </Viewbox>
+                <TextBlock Text="God Mode" VerticalAlignment="Center" FontSize="16"/>
+            </StackPanel>
+        </Button>
+    </StackPanel>
+</Window>

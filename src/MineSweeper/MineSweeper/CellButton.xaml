@@ -1,0 +1,207 @@
+<UserControl x:Class="MineSweeper.CellButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mineSweeper="clr-namespace:MineSweeper"
+             mc:Ignorable="d"
+             d:DesignHeight="32"
+             d:DesignWidth="32"
+             x:Name="TheCellButton"
+             DataContext="{Binding ViewModel, ElementName=TheCellButton}">
+    <UserControl.Resources>
+        <ControlTemplate x:Key="CellButtonTemplate" TargetType="{x:Type ButtonBase}">
+            <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="true">
+                <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="Button.IsDefaulted" Value="true">
+                    <Setter Property="BorderBrush" TargetName="border" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"/>
+                </Trigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsMouseOver" Value="True" />
+                        <Condition Property="IsTabStop" Value="False" />
+                    </MultiTrigger.Conditions>
+                    <Setter Property="BorderBrush" TargetName="border" Value="Black"/>
+                    <Setter Property="BorderThickness" TargetName="border" Value="1"/>
+                </MultiTrigger>
+
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" TargetName="border" Value="White"/>
+                    <Setter Property="BorderBrush" TargetName="border" Value="WhiteSmoke"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+    </UserControl.Resources>
+    <Button Template="{DynamicResource CellButtonTemplate}"
+        BorderBrush="Gray"
+        BorderThickness="1"
+        Padding="0"
+        HorizontalContentAlignment="Center"
+        VerticalContentAlignment="Center">
+        <Button.Resources>
+
+            <mineSweeper:HasNeighborCountConverter x:Key="HasNeighborCountConverter"  />
+
+            <Style TargetType="Viewbox">
+                <Setter Property="Stretch" Value="Uniform" />
+            </Style>
+
+            <Style x:Key="CellContentTextBlockStyle" TargetType="TextBlock">
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="TextAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="NumberTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource CellContentTextBlockStyle}">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding NeighborMinesCount}" Value="1">
+                        <Setter Property="Foreground" Value="Blue" />
+                        <Setter Property="Text" Value="1" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding NeighborMinesCount}" Value="2">
+                        <Setter Property="Foreground" Value="Green" />
+                        <Setter Property="Text" Value="2" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding NeighborMinesCount}" Value="3" >
+                        <Setter Property="Foreground" Value="Navy" />
+                        <Setter Property="Text" Value="3" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding NeighborMinesCount}" Value="4">
+                        <Setter Property="Foreground" Value="Navy" />
+                        <Setter Property="Text" Value="4" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding NeighborMinesCount}" Value="5">
+                        <Setter Property="Foreground" Value="Brown" />
+                        <Setter Property="Text" Value="5" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding NeighborMinesCount}" Value="6">
+                        <Setter Property="Foreground" Value="Cyan" />
+                        <Setter Property="Text" Value="6" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding NeighborMinesCount}" Value="7">
+                        <Setter Property="Foreground" Value="Black" />
+                        <Setter Property="Text" Value="7" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding NeighborMinesCount}" Value="8">
+                        <Setter Property="Foreground" Value="Gray" />
+                        <Setter Property="Text" Value="8" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Button.Resources>
+
+        <Button.Style>
+            <Style TargetType="Button">
+                <Setter Property="Background" Value="LightGray" />
+                <Style.Triggers>
+
+                    <!-- Flagged -->
+                    <DataTrigger Binding="{Binding IsFlagged}" Value="True">
+                        <Setter Property="Content">
+                            <Setter.Value>
+                                <Viewbox>
+                                    <TextBlock Text="🚩"  Style="{StaticResource CellContentTextBlockStyle}" Foreground="DarkRed" />
+                                </Viewbox>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Background" Value="LightCoral" />
+                    </DataTrigger>
+
+                    <!-- Question Mark -->
+                    <DataTrigger Binding="{Binding IsQuestionMarked}" Value="True">
+                        <Setter Property="Content">
+                            <Setter.Value>
+                                <Viewbox>
+                                    <TextBlock Text="?" Style="{StaticResource CellContentTextBlockStyle}" Foreground="DarkOrange" />
+                                </Viewbox>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Background" Value="Khaki" />
+                    </DataTrigger>
+
+                    <!-- Exploded -->
+                    <DataTrigger Binding="{Binding IsExploded}" Value="True">
+                        <Setter Property="Content">
+                            <Setter.Value>
+                                <Viewbox>
+                                    <TextBlock Text="💥"
+                                               Style="{StaticResource CellContentTextBlockStyle}"
+                                               Foreground="Red"
+                                               Background="Transparent" />
+                                </Viewbox>
+                            </Setter.Value>
+                        </Setter>
+                        <Setter Property="Background" Value="Transparent" />
+                    </DataTrigger>
+
+                    <!-- Revealed Empty -->
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding IsRevealed}" Value="True" />
+                            <Condition Binding="{Binding IsExploded}" Value="False" />
+                            <Condition Binding="{Binding IsMine}" Value="False" />
+                            <Condition Binding="{Binding NeighborMinesCount, Converter={StaticResource HasNeighborCountConverter}}" Value="False" />
+                        </MultiDataTrigger.Conditions>
+                        <Setter Property="Background" Value="White" />
+                        <Setter Property="Content" Value="" />
+                        <Setter Property="IsTabStop" Value="False" />
+                    </MultiDataTrigger>
+
+                    <!-- Revealed with Mine, flagged -->
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding IsRevealed}" Value="True" />
+                            <Condition Binding="{Binding IsExploded}" Value="False" />
+                            <Condition Binding="{Binding IsMine}" Value="True" />
+                            <Condition Binding="{Binding NeighborMinesCount, Converter={StaticResource HasNeighborCountConverter}}" Value="False" />
+                        </MultiDataTrigger.Conditions>
+                        <Setter Property="Background" Value="WhiteSmoke" />
+                        <Setter Property="Content">
+                            <Setter.Value>
+                                <Viewbox>
+                                    <TextBlock Text="💣"
+                                               Style="{StaticResource CellContentTextBlockStyle}"
+                                               Foreground="Black"
+                                               Background="Transparent" />
+                                </Viewbox>
+                            </Setter.Value>
+                        </Setter>
+                    </MultiDataTrigger>
+
+                    <!-- Revealed with Number -->
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition Binding="{Binding IsRevealed}" Value="True" />
+                            <Condition Binding="{Binding IsExploded}" Value="False" />
+                            <Condition Binding="{Binding NeighborMinesCount, Converter={StaticResource HasNeighborCountConverter}}" Value="True" />
+                        </MultiDataTrigger.Conditions>
+                        <Setter Property="Background" Value="White" />
+                        <Setter Property="IsTabStop" Value="False" />
+                        <Setter Property="Content">
+                            <Setter.Value>
+                                <Viewbox>
+                                    <TextBlock Text="{Binding NeighborMinesCount}"
+                                           Style="{StaticResource NumberTextBlockStyle}" />
+                                </Viewbox>
+                            </Setter.Value>
+                        </Setter>
+                    </MultiDataTrigger>
+
+                </Style.Triggers>
+            </Style>
+        </Button.Style>
+        <Button.InputBindings>
+            <!-- Right click = toggle flag -->
+            <MouseBinding MouseAction="RightClick" Command="{Binding ToggleFlagCommand}" CommandParameter="{Binding ElementName=TheCellButton}" />
+
+            <!-- Touch support (tap = reveal) -->
+            <MouseBinding Gesture="LeftClick" Command="{Binding RevealCellCommand}" CommandParameter="{Binding ElementName=TheCellButton}" />
+
+            <!-- Middle click = reveal adjacent cells -->
+            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding RevealAdjacentCellsCommand}" CommandParameter="{Binding ElementName=TheCellButton}" />
+        </Button.InputBindings>
+    </Button>
+</UserControl>
