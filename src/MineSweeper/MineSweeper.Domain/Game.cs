@@ -31,42 +31,68 @@ public sealed class Game
         return game;
     }
 
+    public static Game Create(int rows, int columns, IEnumerable<Position> minePositions)
+    {
+        var board = Board.CreateInstance(rows, columns);
+
+        var distinctMinePositions = minePositions.ToHashSet();
+
+        var game = new Game(distinctMinePositions.Count)
+        {
+            Board = board
+        };
+
+        board.PlaceMines(distinctMinePositions);
+        game.Start();
+
+        return game;
+    }
+
     public OperationResult RevealCell(in Position position) => RevealCell(in position, out _);
 
     public OperationResult RevealCell(in Position position, out IReadOnlyCollection<Cell> affectedCells)
     {
         var cell = Board[position];
 
-        Board.RevealCell(position, out affectedCells);
+        return RevealCell(cell, out affectedCells);
+    }
+
+    public OperationResult RevealCell(Cell cell, out IReadOnlyCollection<Cell> affectedCells)
+    {
+        Board.RevealCell(cell, out affectedCells);
 
         if (cell.IsMine)
         {
-            GameOver();
-            return OperationResults.GameOver;
+            return GameOver(out affectedCells);
         }
 
         if (Board.AreAllCellsRevealedOrFlagged())
         {
-            Win();
-            return OperationResults.GameWon;
+            return Win();
         }
 
         return OperationResult.Success;
     }
 
-    public void RevealObviousNeighborCells(in Position revealedCellPosition,
+    public OperationResult RevealObviousNeighborCells(in Position revealedCellPosition,
         out IReadOnlyCollection<Cell> affectedCells)
     {
         var cell = Board.GetCell(revealedCellPosition);
 
+        return RevealObviousNeighborCells(cell, out affectedCells);
+    }
+
+    public OperationResult RevealObviousNeighborCells(Cell cell,
+        out IReadOnlyCollection<Cell> affectedCells)
+    {
         // Only proceed if the cell is revealed and has at least one neighbor mine
         if (cell is not { IsRevealed: true, NeighborMinesCount: > 0 })
         {
             affectedCells = [];
-            return;
+            return OperationResult.Success;
         }
 
-        var neighbors = Board.GetNeighborCells(revealedCellPosition).ToList();
+        var neighbors = Board.GetNeighborCells(cell.Position).ToList();
 
         var flaggedCount = neighbors.Count(n => n.IsFlagged);
 
@@ -74,7 +100,7 @@ public sealed class Game
         if (flaggedCount != cell.NeighborMinesCount)
         {
             affectedCells = [];
-            return;
+            return OperationResult.Success;
         }
 
         var affectedCellsSet = new HashSet<Cell>();
@@ -88,7 +114,22 @@ public sealed class Game
             affectedCellsSet.UnionWith(currentAffectedCells);
         }
 
+        if (affectedCellsSet.Any(c => c is { IsExploded: true }))
+        {
+            var gameOverResult = GameOver(out var gameOverAffectedCells);
+            affectedCellsSet.UnionWith(gameOverAffectedCells);
+            affectedCells = affectedCellsSet;
+            return gameOverResult;
+        }
+
         affectedCells = affectedCellsSet;
+
+        if (Board.AreAllCellsRevealedOrFlagged())
+        {
+            return Win();
+        }
+
+        return OperationResult.Success;
     }
 
     public OperationResult ToggleFlag(in Position position)
@@ -115,24 +156,30 @@ public sealed class Game
         State = GameState.InProgress;
     }
 
-    private void GameOver()
+    private OperationResult GameOver(out IReadOnlyCollection<Cell> affectedCells)
     {
-        if (State != GameState.InProgress)
-        {
-            throw new InvalidOperationException("Game is not in progress.");
-        }
-
         State = GameState.GameOver;
+
+        var affectedCellsList = new List<Cell>();
 
         foreach (var cell in Board.GetAllCells())
         {
             if (cell is { IsRevealed: false, IsMine: true })
+            {
                 cell.RevealMine();
+                affectedCellsList.Add(cell);
+            }
         }
+
+        affectedCells = affectedCellsList.AsReadOnly();
+
+        return OperationResults.GameOver;
     }
 
-    private void Win()
+    private OperationResult Win()
     {
         State = GameState.Won;
+
+        return OperationResults.GameWon;
     }
 }

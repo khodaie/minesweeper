@@ -1,7 +1,10 @@
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 
 namespace MineSweeper.Domain;
 
+[DebuggerDisplay("{GetDebuggerDisplay(),nq}")]
 public sealed class Board
 {
     public int RowsCount { get; }
@@ -136,7 +139,7 @@ public sealed class Board
             {
                 switch (Cells[row, column])
                 {
-                    case { IsRevealed: false, IsFlagged: false }:
+                    case { IsFlagged: false, IsRevealed: false }:
                     case { IsFlagged: true, IsMine: false }:
                         return false;
                 }
@@ -186,6 +189,19 @@ public sealed class Board
         }
     }
 
+    internal void PlaceMines(IEnumerable<Position> minePositions)
+    {
+        foreach (var minePosition in minePositions.Distinct())
+        {
+            if (GetCell(minePosition).IsMine)
+            {
+                continue;
+            }
+
+            PlaceMine(minePosition);
+        }
+    }
+
     private void RevealRecursive(Cell cell, HashSet<Cell> handledCells)
     {
         if (cell.IsRevealed || cell.IsFlagged || !handledCells.Add(cell))
@@ -212,4 +228,43 @@ public sealed class Board
 
     public int GetUnrevealedMinesCount() =>
         GetAllCells().Count(c => c is { IsRevealed: false, IsFlagged: false, IsMine: true });
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    private string GetDebuggerDisplay()
+    {
+        var sb = new System.Text.StringBuilder();
+        for (var row = 0; row < RowsCount; row++)
+        {
+            for (var col = 0; col < ColumnsCount; col++)
+            {
+                var cell = Cells[row, col];
+                if (cell.IsRevealed)
+                {
+                    if (cell.IsMine)
+                        sb.Append('*');
+                    else if (cell.NeighborMinesCount > 0)
+                        sb.Append(cell.NeighborMinesCount);
+                    else
+                        sb.Append(' ');
+                }
+                else if (cell.IsFlagged)
+                {
+                    sb.Append('F');
+                }
+                else if (cell.IsQuestionMarked)
+                {
+                    sb.Append('?');
+                }
+                else
+                {
+                    sb.Append('#');
+                }
+            }
+
+            if (row < RowsCount - 1)
+                sb.AppendLine("|");
+        }
+
+        return sb.ToString();
+    }
 }

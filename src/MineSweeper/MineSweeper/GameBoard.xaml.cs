@@ -4,21 +4,21 @@ using CommunityToolkit.Mvvm.Messaging;
 
 namespace MineSweeper;
 
-sealed partial class GameControl
+sealed partial class GameBoard
 {
     private const int CellSize = 16;
 
     public static readonly DependencyProperty RowsCountProperty =
-        DependencyProperty.Register(nameof(RowsCount), typeof(int), typeof(GameControl),
-            new UIPropertyMetadata(0, static (s, _) => ((GameControl)s).Render()));
+        DependencyProperty.Register(nameof(RowsCount), typeof(int), typeof(GameBoard),
+            new UIPropertyMetadata(0, static (s, _) => ((GameBoard)s).Render()));
 
     public static readonly DependencyProperty ColumnsCountProperty =
-        DependencyProperty.Register(nameof(ColumnsCount), typeof(int), typeof(GameControl),
-            new PropertyMetadata(0, static (s, _) => ((GameControl)s).Render()));
+        DependencyProperty.Register(nameof(ColumnsCount), typeof(int), typeof(GameBoard),
+            new PropertyMetadata(0, static (s, _) => ((GameBoard)s).Render()));
 
     public static readonly DependencyProperty MinesCountProperty =
-        DependencyProperty.Register(nameof(MinesCount), typeof(int), typeof(GameControl),
-            new PropertyMetadata(0, static (s, _) => ((GameControl)s).Render()));
+        DependencyProperty.Register(nameof(MinesCount), typeof(int), typeof(GameBoard),
+            new PropertyMetadata(0, static (s, _) => ((GameBoard)s).Render()));
 
     public GameViewModel? ViewModel
     {
@@ -27,7 +27,7 @@ sealed partial class GameControl
     }
 
     public static readonly DependencyProperty ViewModelProperty =
-        DependencyProperty.Register(nameof(ViewModel), typeof(GameViewModel), typeof(GameControl),
+        DependencyProperty.Register(nameof(ViewModel), typeof(GameViewModel), typeof(GameBoard),
             new UIPropertyMetadata(defaultValue: null));
 
     public int RowsCount
@@ -48,7 +48,7 @@ sealed partial class GameControl
         set => SetValue(MinesCountProperty, value);
     }
 
-    public GameControl()
+    public GameBoard()
     {
         InitializeComponent();
     }

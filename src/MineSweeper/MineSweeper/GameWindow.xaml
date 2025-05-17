@@ -8,8 +8,23 @@
         mc:Ignorable="d"
         Title="Game" Height="512" Width="512">
     <Window.Resources>
-        <Style x:Key="LabelStyle" TargetType="TextBlock">
-            <Setter Property="Margin" Value="0,0,4,0" />
+        <Style x:Key="LcdTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FF00FF00" />
+            <Setter Property="Background" Value="#FF222222" />
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Padding" Value="4,2" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#FF00FF00" BlurRadius="2" ShadowDepth="0" Opacity="0.7" />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+        </Style>
+        <Style x:Key="LabelStyle" TargetType="TextBlock" BasedOn="{StaticResource LcdTextBlockStyle}">
+            <Setter Property="Padding" Value="4,0,4,0" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
         </Style>
     </Window.Resources>
     <Grid>
@@ -17,31 +32,37 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Border>
+        <Border Background="#FF222222">
             <StackPanel Orientation="Vertical" Margin="4">
-                <TextBlock Text="Mine Sweeper" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <TextBlock Text="Mine Sweeper" FontSize="24" Style="{StaticResource LcdTextBlockStyle}" />
                 <Grid Margin="8">
                     <Grid.RowDefinitions>
                         <RowDefinition />
                         <RowDefinition />
                     </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions >
+                    <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="3*" />
                         <ColumnDefinition Width="1*" />
                         <ColumnDefinition Width="3*" />
                         <ColumnDefinition Width="1*" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Mines Count:" Style="{StaticResource LabelStyle}" />
-                    <TextBlock Text="{Binding ElementName=TheGameControl, Path=MinesCount}" Grid.Row="0" Grid.Column="1" />
-                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Remaining Mines Count:" Style="{StaticResource LabelStyle}" />
-                    <TextBlock Text="{Binding ElementName=TheGameControl, Path=ViewModel.UnrevealedMinesCount, FallbackValue=0}"  Grid.Row="0" Grid.Column="3" />
+                    <TextBlock Text="{Binding ElementName=TheGameControl, Path=MinesCount}" Grid.Row="0"
+                               Grid.Column="1"
+                               Style="{StaticResource LcdTextBlockStyle}" />
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Remaining Mines Count:"
+                               Style="{StaticResource LabelStyle}" />
+                    <TextBlock
+                        Text="{Binding ElementName=TheGameControl, Path=ViewModel.UnrevealedMinesCount, FallbackValue=0}"
+                        Grid.Row="0" Grid.Column="3"
+                        Style="{StaticResource LcdTextBlockStyle}" />
                 </Grid>
             </StackPanel>
 
         </Border>
-        <mineSweeper:GameControl x:Name="TheGameControl" Grid.Row="1"
-                           RowsCount="{Binding RowsCount, ElementName=TheGame}"
-                           ColumnsCount="{Binding ColumnsCount, ElementName=TheGame}"
-                           MinesCount="{Binding MinesCount, ElementName=TheGame}" />
+        <mineSweeper:GameBoard x:Name="TheGameControl" Grid.Row="1"
+                               RowsCount="{Binding RowsCount, ElementName=TheGame}"
+                               ColumnsCount="{Binding ColumnsCount, ElementName=TheGame}"
+                               MinesCount="{Binding MinesCount, ElementName=TheGame}" />
     </Grid>
 </Window>

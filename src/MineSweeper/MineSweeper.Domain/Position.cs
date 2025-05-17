@@ -20,4 +20,6 @@ public readonly record struct Position
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(Row, rows);
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(Column, columns);
     }
+
+    public static implicit operator Position((int row, int column) tuple) => new(tuple.row, tuple.column);
 }

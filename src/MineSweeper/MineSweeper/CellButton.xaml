@@ -199,6 +199,9 @@
 
             <!-- Touch support (tap = reveal) -->
             <MouseBinding Gesture="LeftClick" Command="{Binding RevealCellCommand}" CommandParameter="{Binding ElementName=TheCellButton}" />
+
+            <!-- Middle click = reveal adjacent cells -->
+            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding RevealAdjacentCellsCommand}" CommandParameter="{Binding ElementName=TheCellButton}" />
         </Button.InputBindings>
     </Button>
 </UserControl>

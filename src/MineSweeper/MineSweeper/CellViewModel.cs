@@ -9,11 +9,13 @@ namespace MineSweeper;
 public sealed class CellViewModel : ObservableObject
 {
     private readonly IMessenger _messenger;
-    private readonly RelayCommand _revealCellCommand, _toggleFlagCommand;
+    private readonly RelayCommand _revealCellCommand, _toggleFlagCommand, _revealAdjacentCellsCommand;
 
     public ICommand RevealCellCommand => _revealCellCommand;
 
     public ICommand ToggleFlagCommand => _toggleFlagCommand;
+
+    public ICommand RevealAdjacentCellsCommand => _revealAdjacentCellsCommand;
 
     public Cell Cell { get; }
 
@@ -40,6 +42,7 @@ public sealed class CellViewModel : ObservableObject
 
         _revealCellCommand = new RelayCommand(RevealCell, CanRevealCell);
         _toggleFlagCommand = new RelayCommand(FlagCell, CanExecuteFlagCommand);
+        _revealAdjacentCellsCommand = new RelayCommand(RevealAdjacentCells, CanExecuteRevealAdjacentCellsCommand);
     }
 
     public void Refresh()
@@ -53,9 +56,8 @@ public sealed class CellViewModel : ObservableObject
 
         _revealCellCommand.NotifyCanExecuteChanged();
         _toggleFlagCommand.NotifyCanExecuteChanged();
+        _revealAdjacentCellsCommand.NotifyCanExecuteChanged();
     }
-
-    private bool CanRevealCell() => this is { IsRevealed: false, IsFlagged: false };
 
     private void RevealCell()
     {
@@ -71,5 +73,17 @@ public sealed class CellViewModel : ObservableObject
         Refresh();
     }
 
+    private void RevealAdjacentCells()
+    {
+        _messenger.Send(new RevealAdjacentCellsMessage(this));
+
+        Refresh();
+    }
+
+    private bool CanRevealCell() => this is { IsRevealed: false, IsFlagged: false };
+
     private bool CanExecuteFlagCommand() => this is { IsRevealed: false };
+
+    private bool CanExecuteRevealAdjacentCellsCommand() =>
+        this is { IsRevealed: true, IsFlagged: false, NeighborMinesCount: > 0 };
 }

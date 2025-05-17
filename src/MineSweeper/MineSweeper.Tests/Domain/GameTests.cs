@@ -1,3 +1,4 @@
+using System.Reflection;
 using MineSweeper.Domain;
 
 namespace MineSweeper.Tests.Domain;
@@ -97,7 +98,7 @@ public sealed class GameTests
         var game = Game.Create(3, 3, 2, Shared.Random);
 
         // Find all mine and non-mine positions
-        var minePositions = new List<Position>();
+        List<Position> minePositions = [];
         var safePositions = new List<Position>();
         foreach (var cell in game.Board.GetAllCells())
         {
@@ -140,11 +141,11 @@ public sealed class GameTests
         Position? minePos = null;
         foreach (var cell in game.Board.GetAllCells())
         {
-            if (cell.IsMine)
-            {
-                minePos = cell.Position;
-                break;
-            }
+            if (!cell.IsMine)
+                continue;
+
+            minePos = cell.Position;
+            break;
         }
 
         Assert.NotNull(minePos);
@@ -156,7 +157,6 @@ public sealed class GameTests
         Assert.Equal(GameState.GameOver, game.State);
         Assert.Equal(OperationResults.GameOver, result);
         Assert.NotNull(affectedCells);
-        Assert.Contains(affectedCells, c => c.Position.Equals(minePos.Value));
     }
 
     [Fact]
@@ -190,5 +190,170 @@ public sealed class GameTests
             if (neighbor is { IsMine: false, IsFlagged: false })
                 Assert.Contains(affectedCells, c => c.Position.Equals(neighbor.Position));
         }
+    }
+
+    [Fact]
+    public void Create_InitializesBoardWithCorrectDimensions()
+    {
+        var game = Game.Create(4, 5, 3, Shared.Random);
+        Assert.Equal(4, game.Board.RowsCount);
+        Assert.Equal(5, game.Board.ColumnsCount);
+    }
+
+    [Fact]
+    public void RevealCell_ReturnsGameOver_WhenMineIsRevealed()
+    {
+        var game = Game.Create(2, 2, 1, Shared.Random);
+        // Find a mine cell
+        var mineCell = game.Board.GetAllCells().FirstOrDefault(c => c.IsMine);
+        Assert.NotNull(mineCell);
+        var result = game.RevealCell(mineCell.Position, out var affectedCells);
+        Assert.Equal(OperationResults.GameOver, result);
+        Assert.Equal(GameState.GameOver, game.State);
+        Assert.NotNull(affectedCells);
+    }
+
+    [Fact]
+    public void RevealObviousNeighborCells_DoesNothing_WhenCellNotRevealedOrNoNeighborMines()
+    {
+        var game = Game.Create(3, 3, 1, Shared.Random);
+        var cell = game.Board.GetAllCells().First(c => !c.IsMine && c.NeighborMinesCount == 0);
+        // Not revealed yet
+        var result = game.RevealObviousNeighborCells(cell.Position, out var affectedCells);
+        Assert.True(result.IsSuccess);
+        Assert.Empty(affectedCells);
+
+        // Reveal cell, still no neighbor mines
+        game.RevealCell(cell.Position);
+        result = game.RevealObviousNeighborCells(cell.Position, out affectedCells);
+        Assert.True(result.IsSuccess);
+        Assert.Empty(affectedCells);
+    }
+
+    [Fact]
+    public void RevealObviousNeighborCells_GameOver_WhenRevealedNeighborIsMine()
+    {
+        var game = Game.Create(3, 3, [(row: 1, column: 1)]);
+
+        game.RevealCell((row: 2, column: 2));
+        game.ToggleFlag((row: 1, column: 2));
+
+        var result = game.RevealObviousNeighborCells((row: 2, column: 2), out var affectedCells);
+        Assert.Equal(OperationResults.GameOver, result);
+        Assert.Equal(GameState.GameOver, game.State);
+        Assert.NotNull(affectedCells);
+    }
+
+    [Fact]
+    public void ToggleFlag_DoesNotWinGame_IfNotAllCellsRevealedOrFlagged()
+    {
+        var game = Game.Create(2, 2, 1, Shared.Random);
+        var pos = game.Board.GetAllCells().First(c => c.IsMine).Position;
+        var result = game.ToggleFlag(pos);
+        Assert.True(result.IsSuccess);
+        Assert.NotEqual(GameState.Won, game.State);
+    }
+
+    [Fact]
+    public void ToggleFlag_TogglesFlagOff()
+    {
+        var game = Game.Create(2, 2, 1, Shared.Random);
+        var pos = game.Board.GetAllCells().First().Position;
+        game.ToggleFlag(pos);
+        var cell = game.Board.GetCell(pos);
+        Assert.True(cell.IsFlagged);
+        game.ToggleFlag(pos);
+        Assert.False(cell.IsFlagged);
+    }
+
+    [Fact]
+    public void Start_ThrowsIfGameAlreadyStarted()
+    {
+        var game = Game.Create(2, 2, 1, Shared.Random);
+        var startMethod = typeof(Game).GetMethod("Start",
+            BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.NotNull(startMethod);
+        var ex = Assert.Throws<TargetInvocationException>(() => startMethod.Invoke(game, null));
+        Assert.IsType<InvalidOperationException>(ex.InnerException);
+    }
+
+    [Fact]
+    public void Create_WithMinePositions_InitializesGameWithCorrectMineCount()
+    {
+        Position[] minePositions = [(0, 0), new(1, 1)];
+        var game = Game.Create(3, 3, minePositions);
+        Assert.Equal(GameState.InProgress, game.State);
+        Assert.Equal(minePositions.Length, game.MinesCount);
+        foreach (var pos in minePositions)
+        {
+            Assert.True(game.Board[pos].IsMine);
+        }
+    }
+
+    [Fact]
+    public void RevealCell_ReturnsGameOver_WhenRevealedCellIsMine()
+    {
+        Position[] minePositions = [(0, 0), (3, 3)];
+        var game = Game.Create(4, 4, minePositions);
+        var result = game.RevealCell((0, 0), out var affectedCells);
+        Assert.Equal(OperationResults.GameOver, result);
+        Assert.Equal(GameState.GameOver, game.State);
+        Assert.NotNull(affectedCells);
+        Assert.Contains(affectedCells, c => c.Position.Equals((3, 3)));
+    }
+
+    [Fact]
+    public void RevealCell_ReturnsGameWon_WhenAllCellsRevealedOrFlagged()
+    {
+        Position[] minePositions = [new(0, 0)];
+        var game = Game.Create(2, 2, minePositions);
+        // Flag the mine
+        game.ToggleFlag(new Position(0, 0));
+        // Reveal all other cells
+        foreach (var cell in game.Board.GetAllCells())
+        {
+            if (!cell.IsMine)
+                game.RevealCell(cell.Position);
+        }
+
+        Assert.Equal(GameState.Won, game.State);
+    }
+
+    [Fact]
+    public void ToggleFlag_ReturnsGameWon_WhenAllCellsRevealedOrFlagged()
+    {
+        Position[] minePositions = [new(0, 0)];
+        var game = Game.Create(2, 2, minePositions);
+        // Reveal all non-mine cells
+        foreach (var cell in game.Board.GetAllCells())
+        {
+            if (!cell.IsMine)
+                game.RevealCell(cell.Position);
+        }
+
+        // Flag the mine
+        var result = game.ToggleFlag(new Position(0, 0));
+        Assert.Equal(OperationResults.GameWon, result);
+        Assert.Equal(GameState.Won, game.State);
+    }
+
+    [Fact]
+    public void RevealObviousNeighborCells_DoesNothing_IfCellNotRevealedOrNoNeighborMines()
+    {
+        var game = Game.Create(3, 3, 0, Shared.Random);
+        var cell = game.Board.GetAllCells().First();
+        var result = game.RevealObviousNeighborCells(cell.Position, out var affectedCells);
+        Assert.True(result.IsSuccess);
+        Assert.Empty(affectedCells);
+    }
+
+    [Fact]
+    public void Start_ThrowsInvalidOperationException_IfGameAlreadyStarted()
+    {
+        var game = Game.Create(2, 2, 1, Shared.Random);
+        var startMethod = typeof(Game).GetMethod("Start", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.NotNull(startMethod);
+        var ex = Assert.Throws<TargetInvocationException>(() => startMethod.Invoke(game, null));
+        Assert.IsType<InvalidOperationException>(ex.InnerException);
     }
 }

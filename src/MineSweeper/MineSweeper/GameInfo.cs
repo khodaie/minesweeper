@@ -16,11 +16,4 @@ public sealed record GameInfo
     public int RowsCount { get; init; }
     public int ColumnsCount { get; init; }
     public int MinesCount { get; init; }
-
-    public void Deconstruct(out int Rows, out int Columns, out int Mines)
-    {
-        Rows = RowsCount;
-        Columns = ColumnsCount;
-        Mines = MinesCount;
-    }
 }

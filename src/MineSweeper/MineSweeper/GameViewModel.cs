@@ -26,6 +26,7 @@ public sealed class GameViewModel : ObservableObject
 
         _messenger.Register<CellRevealedMessage>(this, OnCellRevealed);
         _messenger.Register<CellToggleFlagMessage>(this, OnCellToggleFlag);
+        _messenger.Register<RevealAdjacentCellsMessage>(this, OnRevealAdjacentCells);
     }
 
     private void Refresh() => RefreshCells(Board.Cells);
@@ -54,7 +55,7 @@ public sealed class GameViewModel : ObservableObject
 
     private void OnCellRevealed(object recipient, CellRevealedMessage message)
     {
-        var operationResult = Game.RevealCell(message.Cell.Position, out var affectedCells);
+        var operationResult = Game.RevealCell(message.Cell.Cell, out var affectedCells);
 
         if (affectedCells.Count != 0)
             RefreshCells(affectedCells.Select(c => Board.GetCell(c.Position)));
@@ -69,6 +70,18 @@ public sealed class GameViewModel : ObservableObject
         var operationResult = Game.ToggleFlag(message.Cell.Position);
 
         RefreshCells(message.Cell);
+
+        OnPropertyChanged(nameof(UnrevealedMinesCount));
+
+        HandleGameResult(operationResult);
+    }
+
+    private void OnRevealAdjacentCells(object recipient, RevealAdjacentCellsMessage message)
+    {
+        var operationResult = Game.RevealObviousNeighborCells(message.Cell.Cell, out var affectedCells);
+
+        if (affectedCells.Count != 0)
+            RefreshCells(affectedCells.Select(c => Board.GetCell(c.Position)));
 
         OnPropertyChanged(nameof(UnrevealedMinesCount));
 
