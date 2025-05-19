@@ -11,17 +11,17 @@ public sealed class Board
 
     public int ColumnsCount { get; }
 
-    private Cell[,] Cells { get; }
+    private ICell[,] Cells { get; }
 
-    public Cell this[int row, int column] => GetCell(new Position(row, column));
+    public ICell this[int row, int column] => GetCell(new Position(row, column));
 
-    public Cell this[in Position position] => GetCell(position);
+    public ICell this[in Position position] => GetCell(position);
 
     private Board(int rows, int columns)
     {
         RowsCount = rows;
         ColumnsCount = columns;
-        Cells = new Cell[rows, columns];
+        Cells = new ICell[rows, columns];
     }
 
     internal static Board CreateInstance(int rows, int columns)
@@ -57,7 +57,7 @@ public sealed class Board
     }
 
     [Pure]
-    public Cell GetCell(in Position position)
+    public ICell GetCell(in Position position)
     {
         ValidatePosition(position);
 
@@ -65,7 +65,7 @@ public sealed class Board
     }
 
     [Pure]
-    public IEnumerable<Cell> GetNeighborCells(Position position)
+    public IEnumerable<ICell> GetNeighborCells(Position position)
     {
         for (var row = position.Row - 1; row <= position.Row + 1; row++)
         {
@@ -109,7 +109,7 @@ public sealed class Board
         return count;
     }
 
-    public void RevealCell(in Position position, out IReadOnlyCollection<Cell> affectedCells)
+    public void RevealCell(in Position position, out IReadOnlyCollection<ICell> affectedCells)
     {
         ValidatePosition(position);
 
@@ -118,7 +118,7 @@ public sealed class Board
         RevealCell(cell, out affectedCells);
     }
 
-    public void RevealCell(Cell cell, out IReadOnlyCollection<Cell> affectedCells)
+    public void RevealCell(ICell cell, out IReadOnlyCollection<ICell> affectedCells)
     {
         if (cell.IsRevealed || cell.IsFlagged)
         {
@@ -126,7 +126,7 @@ public sealed class Board
             return;
         }
 
-        var handledCells = new HashSet<Cell>();
+        var handledCells = new HashSet<ICell>();
         RevealRecursive(cell, handledCells);
         affectedCells = handledCells;
     }
@@ -150,7 +150,7 @@ public sealed class Board
     }
 
     [Pure]
-    public IEnumerable<Cell> GetAllCells()
+    public IEnumerable<ICell> GetAllCells()
     {
         for (var row = 0; row < RowsCount; row++)
         {
@@ -202,7 +202,7 @@ public sealed class Board
         }
     }
 
-    private void RevealRecursive(Cell cell, HashSet<Cell> handledCells)
+    private void RevealRecursive(ICell cell, HashSet<ICell> handledCells)
     {
         if (cell.IsRevealed || cell.IsFlagged || !handledCells.Add(cell))
             return;

@@ -50,14 +50,14 @@ public sealed class Game
 
     public OperationResult RevealCell(in Position position) => RevealCell(in position, out _);
 
-    public OperationResult RevealCell(in Position position, out IReadOnlyCollection<Cell> affectedCells)
+    public OperationResult RevealCell(in Position position, out IReadOnlyCollection<ICell> affectedCells)
     {
         var cell = Board[position];
 
         return RevealCell(cell, out affectedCells);
     }
 
-    public OperationResult RevealCell(Cell cell, out IReadOnlyCollection<Cell> affectedCells)
+    public OperationResult RevealCell(ICell cell, out IReadOnlyCollection<ICell> affectedCells)
     {
         Board.RevealCell(cell, out affectedCells);
 
@@ -75,15 +75,15 @@ public sealed class Game
     }
 
     public OperationResult RevealObviousNeighborCells(in Position revealedCellPosition,
-        out IReadOnlyCollection<Cell> affectedCells)
+        out IReadOnlyCollection<ICell> affectedCells)
     {
         var cell = Board.GetCell(revealedCellPosition);
 
         return RevealObviousNeighborCells(cell, out affectedCells);
     }
 
-    public OperationResult RevealObviousNeighborCells(Cell cell,
-        out IReadOnlyCollection<Cell> affectedCells)
+    public OperationResult RevealObviousNeighborCells(ICell cell,
+        out IReadOnlyCollection<ICell> affectedCells)
     {
         // Only proceed if the cell is revealed and has at least one neighbor mine
         if (cell is not { IsRevealed: true, NeighborMinesCount: > 0 })
@@ -103,7 +103,7 @@ public sealed class Game
             return OperationResult.Success;
         }
 
-        var affectedCellsSet = new HashSet<Cell>();
+        var affectedCellsSet = new HashSet<ICell>();
 
         foreach (var neighbor in neighbors)
         {
@@ -156,11 +156,11 @@ public sealed class Game
         State = GameState.InProgress;
     }
 
-    private OperationResult GameOver(out IReadOnlyCollection<Cell> affectedCells)
+    private OperationResult GameOver(out IReadOnlyCollection<ICell> affectedCells)
     {
         State = GameState.GameOver;
 
-        var affectedCellsList = new List<Cell>();
+        var affectedCellsList = new List<ICell>();
 
         foreach (var cell in Board.GetAllCells())
         {

@@ -3,7 +3,7 @@ using System.Diagnostics;
 namespace MineSweeper.Domain;
 
 [DebuggerDisplay("Cell[{Position.Row}, {Position.Column}]: {State}")]
-public sealed class Cell
+public sealed class Cell : ICell
 {
     public CellState State { get; private set; } = CellState.Hidden;
 
@@ -26,9 +26,15 @@ public sealed class Cell
         Position = position;
     }
 
-    public static Cell CreateInstance(int row, int column) => CreateInstance(new Position(row, column));
+    public static Cell CreateInstance(int row, int column)
+    {
+        return CreateInstance(new Position(row, column));
+    }
 
-    public static Cell CreateInstance(in Position position) => new(position);
+    public static Cell CreateInstance(in Position position)
+    {
+        return new Cell(position);
+    }
 
     internal void Reveal()
     {
@@ -37,6 +43,8 @@ public sealed class Cell
 
         State = IsMine ? CellState.IsExploded : CellState.Revealed;
     }
+
+    void ICell.Reveal() => Reveal();
 
     internal void ToggleFlag()
     {
@@ -52,6 +60,8 @@ public sealed class Cell
         };
     }
 
+    void ICell.ToggleFlag() => ToggleFlag();
+
     internal void PlaceMine()
     {
         if (State is not CellState.Hidden)
@@ -61,6 +71,8 @@ public sealed class Cell
         NeighborMinesCount = -1;
     }
 
+    void ICell.PlaceMine() => PlaceMine();
+
     internal void RevealMine()
     {
         if (IsRevealed || !IsMine)
@@ -68,6 +80,8 @@ public sealed class Cell
 
         State = CellState.MineRevealed;
     }
+
+    void ICell.RevealMine() => RevealMine();
 
     internal void IncreaseNeighborMinesCount()
     {
@@ -82,4 +96,6 @@ public sealed class Cell
 
         NeighborMinesCount++;
     }
+
+    void ICell.IncreaseNeighborMinesCount() => IncreaseNeighborMinesCount();
 }

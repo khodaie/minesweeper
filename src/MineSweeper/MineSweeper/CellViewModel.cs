@@ -17,7 +17,7 @@ public sealed class CellViewModel : ObservableObject
 
     public ICommand RevealAdjacentCellsCommand => _revealAdjacentCellsCommand;
 
-    public Cell Cell { get; }
+    public ICell Cell { get; }
 
     public CellState State => Cell.State;
 
@@ -35,7 +35,7 @@ public sealed class CellViewModel : ObservableObject
 
     public bool IsMine => Cell.IsMine;
 
-    public CellViewModel(Cell cell, IMessenger messenger)
+    public CellViewModel(ICell cell, IMessenger messenger)
     {
         _messenger = messenger;
         Cell = cell;
