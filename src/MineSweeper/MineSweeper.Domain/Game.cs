@@ -4,7 +4,7 @@ public sealed class Game
 {
     public GameState State { get; private set; }
 
-    public required Board Board { get; init; }
+    public required IBoard Board { get; init; }
 
     public int MinesCount { get; }
 
@@ -18,7 +18,7 @@ public sealed class Game
 
     public static Game Create(int rows, int columns, int mines, Random random)
     {
-        var board = Board.CreateInstance(rows, columns);
+        var board = Domain.Board.CreateInstance(rows, columns);
 
         var game = new Game(mines)
         {
@@ -33,7 +33,7 @@ public sealed class Game
 
     public static Game Create(int rows, int columns, IEnumerable<Position> minePositions)
     {
-        var board = Board.CreateInstance(rows, columns);
+        var board = Domain.Board.CreateInstance(rows, columns);
 
         var distinctMinePositions = minePositions.ToHashSet();
 

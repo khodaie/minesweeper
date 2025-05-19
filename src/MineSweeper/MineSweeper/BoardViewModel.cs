@@ -7,7 +7,7 @@ namespace MineSweeper;
 
 public sealed class BoardViewModel : ObservableObject
 {
-    public Board Board { get; }
+    public IBoard Board { get; }
 
     public ObservableCollection<CellViewModel> Cells { get; }
 
@@ -17,7 +17,7 @@ public sealed class BoardViewModel : ObservableObject
 
     public int ColumnsCount => Board.ColumnsCount;
 
-    public BoardViewModel(Board board, IMessenger messenger)
+    public BoardViewModel(IBoard board, IMessenger messenger)
     {
         Board = board;
         Cells =
