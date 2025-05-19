@@ -5,14 +5,16 @@ namespace MineSweeper;
 
 public sealed class GameTimer : ObservableObject
 {
+    private readonly TimeProvider _timeProvider;
     private readonly DispatcherTimer _timer;
     private DateTimeOffset _startedAt;
     private bool _isRunning;
 
     public TimeSpan ElapsedTime { get; private set; }
 
-    public GameTimer(TimeSpan interval)
+    public GameTimer(TimeProvider timeProvider, TimeSpan interval)
     {
+        _timeProvider = timeProvider;
         _timer = new DispatcherTimer
         {
             Interval = interval
@@ -24,7 +26,7 @@ public sealed class GameTimer : ObservableObject
     public void Start()
     {
         if (_isRunning) return;
-        _startedAt = TimeProvider.System.GetUtcNow();
+        _startedAt = _timeProvider.GetUtcNow();
         _isRunning = true;
         _timer.Start();
     }
@@ -43,7 +45,7 @@ public sealed class GameTimer : ObservableObject
             return;
 
         OnPropertyChanging(nameof(ElapsedTime));
-        ElapsedTime = TimeProvider.System.GetUtcNow() - _startedAt;
+        ElapsedTime = _timeProvider.GetUtcNow() - _startedAt;
         OnPropertyChanged(nameof(ElapsedTime));
     }
 }

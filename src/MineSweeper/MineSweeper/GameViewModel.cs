@@ -18,7 +18,7 @@ public sealed class GameViewModel : ObservableObject
 
     public GameState State => Game.State;
 
-    public GameTimer GameTimer { get; } = new(TimeSpan.FromSeconds(0.15));
+    public GameTimer GameTimer { get; } = new(TimeProvider.System, TimeSpan.FromSeconds(0.15));
 
     public GameViewModel(GameInfo gameInfo, IMessenger messenger)
     {
