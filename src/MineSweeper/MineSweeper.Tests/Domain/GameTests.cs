@@ -9,7 +9,7 @@ public sealed class GameTests
     public void Create_InitializesGameWithCorrectStateAndMines()
     {
         var game = Game.Create(3, 3, 2, Shared.Random);
-        Assert.Equal(GameState.InProgress, game.State);
+        Assert.Equal(GameState.Running, game.State);
         Assert.Equal(2, game.MinesCount);
         Assert.NotNull(game.Board);
     }
@@ -282,7 +282,7 @@ public sealed class GameTests
     {
         Position[] minePositions = [(0, 0), new(1, 1)];
         var game = Game.Create(3, 3, minePositions);
-        Assert.Equal(GameState.InProgress, game.State);
+        Assert.Equal(GameState.Running, game.State);
         Assert.Equal(minePositions.Length, game.MinesCount);
         foreach (var pos in minePositions)
         {

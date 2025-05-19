@@ -3,7 +3,7 @@
 public enum GameState
 {
     Initializing,
-    InProgress,
+    Running,
     GameOver,
     Won
 }

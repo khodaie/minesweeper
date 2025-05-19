@@ -9,7 +9,7 @@ public sealed class GameViewModel : ObservableObject
 {
     private readonly IMessenger _messenger;
 
-    public DomainGame Game { get; }
+    public IGame Game { get; }
     public BoardViewModel Board { get; }
 
     public int MinesCount => Game.MinesCount;

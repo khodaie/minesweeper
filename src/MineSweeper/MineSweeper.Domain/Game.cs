@@ -1,6 +1,6 @@
 namespace MineSweeper.Domain;
 
-public sealed class Game
+public sealed class Game : IGame
 {
     public GameState State { get; private set; }
 
@@ -13,7 +13,7 @@ public sealed class Game
         MinesCount = minesCount;
     }
 
-    public static Game Create(int rows, int columns, int mines) =>
+    public static IGame Create(int rows, int columns, int mines) =>
         Create(rows, columns, mines, Random.Shared);
 
     public static Game Create(int rows, int columns, int mines, Random random)
@@ -153,7 +153,7 @@ public sealed class Game
             throw new InvalidOperationException("Game has already started.");
         }
 
-        State = GameState.InProgress;
+        State = GameState.Running;
     }
 
     private OperationResult GameOver(out IReadOnlyCollection<ICell> affectedCells)
