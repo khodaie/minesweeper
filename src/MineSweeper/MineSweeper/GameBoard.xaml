@@ -9,6 +9,4 @@
              x:Name="TheGameUserControl"
              DataContext="{Binding ViewModel, ElementName=TheGameUserControl}"
              Loaded="GameControl_Loaded"
-             Unloaded="GameControl_OnUnloaded">
-    <Grid Name="GameGrid" />
-</UserControl>
+             Unloaded="GameControl_OnUnloaded" />

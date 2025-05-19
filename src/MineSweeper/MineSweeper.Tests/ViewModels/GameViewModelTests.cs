@@ -20,7 +20,7 @@ public sealed class GameViewModelTests
         Assert.NotNull(vm.Board);
         Assert.Equal(info.MinesCount, vm.MinesCount);
         Assert.Equal(vm.Game.State, vm.State);
-        Assert.True(vm.ElapsedTime >= TimeSpan.Zero);
+        Assert.True(vm.GameTimer.ElapsedTime >= TimeSpan.Zero);
     }
 
     [Fact]

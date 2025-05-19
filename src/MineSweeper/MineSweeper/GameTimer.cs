@@ -1,28 +1,30 @@
-using Timer = System.Timers.Timer;
+using System.Windows.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace MineSweeper;
 
-public sealed class GameTimer
+public sealed class GameTimer : ObservableObject
 {
-    private readonly Timer _timer;
-    private DateTime _startedAt;
-    private TimeSpan _elapsed;
+    private readonly DispatcherTimer _timer;
+    private DateTimeOffset _startedAt;
     private bool _isRunning;
 
-    public event Action? Elapsed;
-
-    public TimeSpan ElapsedTime => _isRunning ? DateTime.UtcNow - _startedAt : _elapsed;
+    public TimeSpan ElapsedTime { get; private set; }
 
     public GameTimer(TimeSpan interval)
     {
-        _timer = new Timer(interval);
-        _timer.Elapsed += (_, _) => Elapsed?.Invoke();
+        _timer = new DispatcherTimer
+        {
+            Interval = interval
+        };
+
+        _timer.Tick += (_, _) => UpdateElapsedTime();
     }
 
     public void Start()
     {
         if (_isRunning) return;
-        _startedAt = DateTime.UtcNow;
+        _startedAt = TimeProvider.System.GetUtcNow();
         _isRunning = true;
         _timer.Start();
     }
@@ -30,8 +32,18 @@ public sealed class GameTimer
     public void Stop()
     {
         if (!_isRunning) return;
-        _elapsed = DateTime.UtcNow - _startedAt;
+        UpdateElapsedTime();
         _isRunning = false;
         _timer.Stop();
+    }
+
+    private void UpdateElapsedTime()
+    {
+        if (!_isRunning)
+            return;
+
+        OnPropertyChanging(nameof(ElapsedTime));
+        ElapsedTime = TimeProvider.System.GetUtcNow() - _startedAt;
+        OnPropertyChanged(nameof(ElapsedTime));
     }
 }

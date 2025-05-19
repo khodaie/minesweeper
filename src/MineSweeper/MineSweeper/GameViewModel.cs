@@ -18,9 +18,7 @@ public sealed class GameViewModel : ObservableObject
 
     public GameState State => Game.State;
 
-    public TimeSpan ElapsedTime => _gameTimer.ElapsedTime;
-
-    private readonly GameTimer _gameTimer = new(TimeSpan.FromSeconds(0.75));
+    public GameTimer GameTimer { get; } = new(TimeSpan.FromSeconds(0.15));
 
     public GameViewModel(GameInfo gameInfo, IMessenger messenger)
     {
@@ -32,8 +30,7 @@ public sealed class GameViewModel : ObservableObject
         _messenger.Register<CellToggleFlagMessage>(this, OnCellToggleFlag);
         _messenger.Register<RevealAdjacentCellsMessage>(this, OnRevealAdjacentCells);
 
-        _gameTimer.Elapsed += () => OnPropertyChanged(nameof(ElapsedTime));
-        _gameTimer.Start();
+        GameTimer.Start();
     }
 
     private void Refresh()
@@ -50,13 +47,13 @@ public sealed class GameViewModel : ObservableObject
     {
         if (operationResult == OperationResults.GameOver)
         {
-            _gameTimer.Stop();
+            GameTimer.Stop();
             Refresh();
             _messenger.Send(new GameOverMessage());
         }
         else if (operationResult == OperationResults.GameWon)
         {
-            _gameTimer.Stop();
+            GameTimer.Stop();
             Refresh();
             _messenger.Send(new GameWonMessage());
         }
