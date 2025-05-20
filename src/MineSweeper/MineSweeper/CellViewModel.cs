@@ -35,6 +35,25 @@ public sealed class CellViewModel : ObservableObject
 
     public bool IsMine => Cell.IsMine;
 
+    private bool _isSuggested;
+
+    public bool IsSuggested
+    {
+        get => _isSuggested;
+        set
+        {
+            if (_isSuggested == value)
+                return;
+
+            if (IsRevealed)
+                return;
+
+            OnPropertyChanging();
+            _isSuggested = value;
+            OnPropertyChanged();
+        }
+    }
+
     public CellViewModel(ICell cell, IMessenger messenger)
     {
         _messenger = messenger;

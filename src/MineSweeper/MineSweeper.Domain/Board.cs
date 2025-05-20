@@ -64,9 +64,11 @@ public sealed class Board : IBoard
         for (var row = position.Row - 1; row <= position.Row + 1; row++)
         for (var column = position.Column - 1; column <= position.Column + 1; column++)
         {
-            if (row == position.Row && column == position.Column) continue;
+            if (row == position.Row && column == position.Column)
+                continue;
 
-            if (row < 0 || row >= RowsCount || column < 0 || column >= ColumnsCount) continue;
+            if (row < 0 || row >= RowsCount || column < 0 || column >= ColumnsCount)
+                continue;
 
             yield return Cells[row, column];
         }

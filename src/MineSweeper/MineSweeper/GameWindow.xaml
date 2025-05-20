@@ -31,6 +31,9 @@
             <Setter Property="HorizontalAlignment" Value="Stretch" />
         </Style>
     </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding ElementName=TheGameControl, Path=ViewModel.SuggestACellCommand, FallbackValue={x:Null}}" Key="F7" />
+    </Window.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

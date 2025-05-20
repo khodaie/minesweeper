@@ -26,11 +26,15 @@
                     <Setter Property="BorderBrush" TargetName="border" Value="Black"/>
                     <Setter Property="BorderThickness" TargetName="border" Value="1"/>
                 </MultiTrigger>
-
                 <Trigger Property="IsEnabled" Value="False">
                     <Setter Property="Background" TargetName="border" Value="White"/>
                     <Setter Property="BorderBrush" TargetName="border" Value="WhiteSmoke"/>
                 </Trigger>
+                <!-- Highlight border yellow when IsSuggested is true -->
+                <DataTrigger Binding="{Binding IsSuggested}" Value="True">
+                    <Setter Property="BorderBrush" TargetName="border" Value="Yellow"/>
+                    <Setter Property="BorderThickness" TargetName="border" Value="2"/>
+                </DataTrigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
     </UserControl.Resources>
