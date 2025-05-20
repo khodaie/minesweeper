@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace MineSweeper.Tests.ViewModels;
 
@@ -6,9 +6,16 @@ internal sealed class MockMessenger : IMessenger
 {
     public List<object> SentMessages { get; } = [];
 
-    public void Send<TMessage>(TMessage message) where TMessage : class
+    public void Reset()
     {
-        SentMessages.Add(message!);
+        SentMessages.Clear();
+    }
+
+    public TMessage Send<TMessage, TToken>(TMessage message, TToken token)
+        where TMessage : class where TToken : IEquatable<TToken>
+    {
+        SentMessages.Add(message);
+        return message;
     }
 
     bool IMessenger.IsRegistered<TMessage, TToken>(object recipient, TToken token)
@@ -37,19 +44,8 @@ internal sealed class MockMessenger : IMessenger
         // No-op for mock
     }
 
-    TMessage IMessenger.Send<TMessage, TToken>(TMessage message, TToken token)
-    {
-        SentMessages.Add(message!);
-        return message;
-    }
-
     void IMessenger.Cleanup()
     {
         // No-op for mock
-    }
-
-    public void Reset()
-    {
-        SentMessages.Clear();
     }
 }
