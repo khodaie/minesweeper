@@ -1,12 +1,13 @@
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
 namespace MineSweeper;
 
 sealed partial class GameBoard
 {
+    private readonly WeakReferenceMessenger _messenger = new();
+
     private const int CellSize = 16;
 
     public static readonly DependencyProperty RowsCountProperty =
@@ -63,7 +64,7 @@ sealed partial class GameBoard
         }
 
         ViewModel = new GameViewModel(new GameInfo(RowsCount, ColumnsCount, MinesCount),
-            WeakReferenceMessenger.Default);
+            _messenger);
 
         CreateBoard();
     }
@@ -87,66 +88,50 @@ sealed partial class GameBoard
         if (ViewModel is not { } viewModel)
             return;
 
-        var mainWindow = Application.Current.MainWindow;
-        if (mainWindow is null)
-            return;
+        GameGrid.ColumnDefinitions.Clear();
+        GameGrid.RowDefinitions.Clear();
+        GameGrid.Children.Clear();
+        GameGrid.DataContext = viewModel.Game;
 
-        mainWindow.Cursor = Cursors.Wait;
-        try
+        for (var j = 0; j < viewModel.Board.ColumnsCount; j++)
         {
-            var grid = CreateGameGrid(viewModel);
-
-            AddChild(grid);
+            GameGrid.ColumnDefinitions.Add(new ColumnDefinition { MinWidth = CellSize });
         }
-        finally
+
+        for (var i = 0; i < viewModel.Board.RowsCount; i++)
         {
-            mainWindow.Cursor = Cursors.Arrow;
+            GameGrid.RowDefinitions.Add(new RowDefinition { MinHeight = CellSize });
         }
-    }
 
-    private Grid CreateGameGrid(GameViewModel viewModel)
-    {
-        var grid = new Grid();
+        GameGrid.Children.Capacity = viewModel.Board.RowsCount * viewModel.Board.ColumnsCount;
 
-        for (var i = 0; i < RowsCount; i++)
-            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(CellSize) });
-
-        for (var j = 0; j < ColumnsCount; j++)
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(CellSize) });
-
-        grid.DataContext = viewModel.Game;
-
-        var children = grid.Children;
-
-        children.Capacity = RowsCount * ColumnsCount;
-
-        for (var i = 0; i < RowsCount; i++)
+        for (var i = 0; i < viewModel.Board.RowsCount; i++)
         {
-            for (var j = 0; j < ColumnsCount; j++)
+            for (var j = 0; j < viewModel.Board.ColumnsCount; j++)
             {
-                var cell = viewModel.Board.GetCell(i, j);
+                var cell = viewModel.Board.GetCell(row: i, column: j);
                 var button = new CellButton
                 {
                     ViewModel = cell
                 };
+
                 Grid.SetRow(button, i);
                 Grid.SetColumn(button, j);
-                children.Add(button);
+                GameGrid.Children.Add(button);
             }
         }
-
-        return grid;
     }
 
     private void GameControl_Loaded(object sender, RoutedEventArgs e)
     {
-        WeakReferenceMessenger.Default.Register<GameWonMessage>(this, OnGameWon);
-        WeakReferenceMessenger.Default.Register<GameOverMessage>(this, OnGameOver);
+        _messenger.Register<GameWonMessage>(this, OnGameWon);
+        _messenger.Register<GameOverMessage>(this, OnGameOver);
     }
 
     private void GameControl_OnUnloaded(object sender, RoutedEventArgs e)
     {
-        WeakReferenceMessenger.Default.Unregister<GameWonMessage>(this);
-        WeakReferenceMessenger.Default.Unregister<GameOverMessage>(this);
+        _messenger.UnregisterAll(this);
+        ViewModel?.Cleanup();
+        _messenger.Cleanup();
     }
 }

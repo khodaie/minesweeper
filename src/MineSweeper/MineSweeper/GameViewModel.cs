@@ -93,4 +93,9 @@ public sealed class GameViewModel : ObservableObject
 
         HandleGameResult(operationResult);
     }
+
+    public void Cleanup()
+    {
+        _messenger.UnregisterAll(this);
+    }
 }
