@@ -7,12 +7,17 @@ internal sealed class ManualUserBoard : IUserBoard
     public int RowsCount { get; }
 
     public int ColumnsCount { get; }
+    public int MinesCount { get; }
+    public int RemainingMinesCount { get; }
 
-    internal ManualUserBoard(IEnumerable<IUserCell> cells, int rowsCount, int columnsCount)
+    internal ManualUserBoard(IEnumerable<IUserCell> cells, int rowsCount, int columnsCount, int minesCount,
+        int remainingMinesCount)
     {
         _cells = cells.ToDictionary(c => c.Position);
         RowsCount = rowsCount;
         ColumnsCount = columnsCount;
+        MinesCount = minesCount;
+        RemainingMinesCount = remainingMinesCount;
     }
 
     public IEnumerable<IUserCell> GetAllCells() =>

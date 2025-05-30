@@ -2,6 +2,8 @@ namespace MineSweeper.Domain.Solver;
 
 public sealed class UserBoard(IBoard board) : IUserBoard
 {
+    private int? _minesCount, _remainingMinesCount;
+
     private IBoard Board { get; } = board;
 
     private readonly Dictionary<Position, IUserCell> _allPositions = board.GetAllCells()
@@ -9,6 +11,12 @@ public sealed class UserBoard(IBoard board) : IUserBoard
 
     public int RowsCount => Board.RowsCount;
     public int ColumnsCount => Board.ColumnsCount;
+
+    public int MinesCount => _minesCount ??= Board.GetAllCells()
+        .Count(c => c.IsMine);
+
+    public int RemainingMinesCount => _remainingMinesCount ??= Board.GetAllCells()
+        .Count(c => c is { IsMine: true, State: CellState.Hidden or CellState.QuestionMarked });
 
     public IEnumerable<IUserCell> GetAllCells() =>
         Board.GetAllCells().Select(UserCell.FromCell);
