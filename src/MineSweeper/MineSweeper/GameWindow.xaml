@@ -32,7 +32,8 @@
         </Style>
     </Window.Resources>
     <Window.InputBindings>
-        <KeyBinding Command="{Binding ElementName=TheGameControl, Path=ViewModel.SuggestACellCommand, FallbackValue={x:Null}}" Key="F7" />
+        <KeyBinding Command="{Binding ElementName=TheGameControl, Path=ViewModel.SuggestCellsCommand, FallbackValue={x:Null}}" Key="F7" />
+        <KeyBinding Command="{Binding ElementName=TheGameControl, Path=ViewModel.ApplySuggestionsCommand, FallbackValue={x:Null}}" Key="F8" />
     </Window.InputBindings>
     <Grid>
         <Grid.RowDefinitions>

@@ -2,5 +2,6 @@ namespace MineSweeper.Domain.Solver;
 
 public interface ICellSuggestion
 {
-    IReadOnlyList<UserCell> SuggestCellToReveal(UserBoard userBoard);
+    IReadOnlyList<(IUserCell Cell, SuggestionType Type, SuggestionCertainty Certainty)>
+        SuggestCellToReveal(IUserBoard userBoard);
 }

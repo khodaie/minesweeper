@@ -46,4 +46,35 @@ public sealed class PositionTests
         Assert.Equal(4, pos.Row);
         Assert.Equal(5, pos.Column);
     }
+
+    [Theory]
+    [MemberData(nameof(NeighborPositionsData))]
+    public void GetNeighborPositions_ReturnsCorrectNeighbors(
+        int row, int col, int rows, int cols, (int Row, int Column)[] expected)
+    {
+        var pos = new Position(row, col);
+        var neighbors = pos.GetNeighborPositions(rows, cols).ToArray();
+
+        var expectedPositions = expected.Select(t => new Position(t.Row, t.Column)).ToArray();
+
+        Assert.Equal(expectedPositions.OrderBy(p => (p.Row, p.Column)), neighbors.OrderBy(p => (p.Row, p.Column)));
+    }
+
+    [Fact]
+    public void GetNeighborPositions_ReturnsEmpty_WhenGridIs1x1()
+    {
+        var pos = new Position(0, 0);
+        var neighbors = pos.GetNeighborPositions(1, 1).ToArray();
+        Assert.Empty(neighbors);
+    }
+
+    public static TheoryData<int, int, int, int, (int Row, int Column)[]> NeighborPositionsData => new()
+    {
+        { 1, 1, 3, 3, [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)] },
+        { 0, 0, 3, 3, [(0, 1), (1, 0), (1, 1)] },
+        { 2, 2, 3, 3, [(1, 1), (1, 2), (2, 1)] },
+        { 0, 2, 3, 3, [(0, 1), (1, 1), (1, 2)] },
+        { 2, 0, 3, 3, [(1, 0), (1, 1), (2, 1)] },
+        { 0, 1, 2, 3, [(0, 0), (0, 2), (1, 0), (1, 1), (1, 2)] }
+    };
 }
