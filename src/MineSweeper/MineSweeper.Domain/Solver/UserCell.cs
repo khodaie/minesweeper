@@ -1,7 +1,17 @@
-﻿namespace MineSweeper.Domain.Solver;
+namespace MineSweeper.Domain.Solver;
 
-public readonly record struct UserCell(Position Position, CellState State, sbyte? NeighborMinesCount)
+public readonly record struct UserCell : IUserCell
 {
-    internal static UserCell FromCell(ICell cell) =>
-        new(cell.Position, cell.State, cell.IsRevealed ? cell.NeighborMinesCount : null);
+    private readonly ICell _cell;
+
+    public Position Position => _cell.Position;
+    public CellState State => _cell.State;
+    public sbyte? NeighborMinesCount => _cell.NeighborMinesCount;
+
+    public bool IsHidden => _cell.State is CellState.Hidden or CellState.QuestionMarked;
+
+    private UserCell(ICell cell) => _cell = cell;
+
+    internal static IUserCell FromCell(ICell cell) =>
+        new UserCell(cell);
 }

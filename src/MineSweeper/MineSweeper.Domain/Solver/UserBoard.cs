@@ -1,35 +1,38 @@
 namespace MineSweeper.Domain.Solver;
 
-public sealed class UserBoard(IBoard board)
+public sealed class UserBoard(IBoard board) : IUserBoard
 {
+    private int? _minesCount, _remainingMinesCount;
+
     private IBoard Board { get; } = board;
 
-    private readonly HashSet<Position> _allPositions = board.GetAllCells()
-        .Select(c => c.Position)
-        .ToHashSet();
+    private readonly Dictionary<Position, IUserCell> _allPositions = board.GetAllCells()
+        .ToDictionary(c => c.Position, UserCell.FromCell);
 
-    public IEnumerable<UserCell> GetAllCells() =>
+    public int RowsCount => Board.RowsCount;
+    public int ColumnsCount => Board.ColumnsCount;
+
+    public int MinesCount => _minesCount ??= Board.GetAllCells()
+        .Count(c => c.IsMine);
+
+    public int RemainingMinesCount => _remainingMinesCount ??= Board.GetAllCells()
+        .Count(c => c is { IsMine: true, State: CellState.Hidden or CellState.QuestionMarked });
+
+    public IEnumerable<IUserCell> GetAllCells() =>
         Board.GetAllCells().Select(UserCell.FromCell);
 
-    public IEnumerable<Position> GetNeighborPositions(Position pos)
+    public IUserCell GetCell(in Position pos) =>
+        UserCell.FromCell(Board.GetCell(in pos));
+
+    public IEnumerable<IUserCell> GetNeighborCells(Position position)
     {
-        // 8 directions
-        int[] dRows = [-1, -1, -1, 0, 0, 1, 1, 1],
-            dCols = [-1, 0, 1, -1, 1, -1, 0, 1];
-
-        foreach (var (dr, dc) in dRows.Zip(dCols))
-        {
-            if (pos.Row + dr < 0 || pos.Row + dr >= Board.RowsCount)
-                continue;
-
-            if (pos.Column + dc < 0 || pos.Column + dc >= Board.ColumnsCount)
-                continue;
-
-            var neighbor = new Position(pos.Row + dr, pos.Column + dc);
-            if (_allPositions.Contains(neighbor))
-                yield return neighbor;
-        }
+        return GetNeighborPositions(position)
+            .Select(p => _allPositions[p]);
     }
 
-    public int GetUnrevealedMinesCount() => Board.GetUnrevealedMinesCount();
+    private IEnumerable<Position> GetNeighborPositions(in Position position)
+    {
+        return position.GetNeighborPositions(Board.RowsCount, Board.ColumnsCount)
+            .Where(neighborPosition => _allPositions.ContainsKey(neighborPosition));
+    }
 }

@@ -30,11 +30,25 @@
                     <Setter Property="Background" TargetName="border" Value="White"/>
                     <Setter Property="BorderBrush" TargetName="border" Value="WhiteSmoke"/>
                 </Trigger>
-                <!-- Highlight border yellow when IsSuggested is true -->
-                <DataTrigger Binding="{Binding IsSuggested}" Value="True">
+
+                <!-- Highlight border yellow when IsSuggested is true or SuggestionType is Flag -->
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsSuggested}" Value="True" />
+                        <Condition Binding="{Binding SuggestionType}" Value="Flag" />
+                    </MultiDataTrigger.Conditions>
                     <Setter Property="BorderBrush" TargetName="border" Value="Yellow"/>
                     <Setter Property="BorderThickness" TargetName="border" Value="2"/>
-                </DataTrigger>
+                </MultiDataTrigger>
+                <!-- New: Highlight border green when suggested to reveal -->
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsSuggested}" Value="True" />
+                        <Condition Binding="{Binding SuggestionType}" Value="Reveal" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="BorderBrush" TargetName="border" Value="LimeGreen"/>
+                    <Setter Property="BorderThickness" TargetName="border" Value="2"/>
+                </MultiDataTrigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
     </UserControl.Resources>

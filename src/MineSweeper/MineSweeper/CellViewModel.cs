@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MineSweeper.Domain;
+using MineSweeper.Domain.Solver;
 
 namespace MineSweeper;
 
@@ -40,16 +41,30 @@ public sealed class CellViewModel : ObservableObject
     public bool IsSuggested
     {
         get => _isSuggested;
-        set
+        private set
         {
             if (_isSuggested == value)
                 return;
 
-            if (IsRevealed)
+            OnPropertyChanging();
+            _isSuggested = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private SuggestionType? _suggestionType;
+
+    public SuggestionType? SuggestionType
+    {
+        get => _suggestionType;
+
+        private set
+        {
+            if (_suggestionType == value)
                 return;
 
             OnPropertyChanging();
-            _isSuggested = value;
+            _suggestionType = value;
             OnPropertyChanged();
         }
     }
@@ -62,6 +77,18 @@ public sealed class CellViewModel : ObservableObject
         _revealCellCommand = new RelayCommand(RevealCell, CanRevealCell);
         _toggleFlagCommand = new RelayCommand(FlagCell, CanExecuteFlagCommand);
         _revealAdjacentCellsCommand = new RelayCommand(RevealAdjacentCells, CanExecuteRevealAdjacentCellsCommand);
+    }
+
+    public void SetSuggested(SuggestionType suggestionType)
+    {
+        IsSuggested = true;
+        SuggestionType = suggestionType;
+    }
+
+    public void ClearSuggested()
+    {
+        IsSuggested = false;
+        SuggestionType = null;
     }
 
     public void Refresh()
@@ -80,6 +107,8 @@ public sealed class CellViewModel : ObservableObject
 
     private void RevealCell()
     {
+        IsSuggested = false;
+
         _messenger.Send(new CellRevealedMessage(this));
 
         Refresh();

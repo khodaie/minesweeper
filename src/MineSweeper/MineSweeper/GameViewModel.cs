@@ -22,7 +22,9 @@ public sealed class GameViewModel : ObservableObject
 
     public GameTimer GameTimer { get; } = new(TimeProvider.System, TimeSpan.FromSeconds(0.25));
 
-    public RelayCommand SuggestACellCommand { get; }
+    public RelayCommand SuggestCellsCommand { get; }
+
+    public RelayCommand ApplySuggestionsCommand { get; }
 
     public GameViewModel(GameInfo gameInfo, IMessenger messenger)
     {
@@ -34,31 +36,60 @@ public sealed class GameViewModel : ObservableObject
         _messenger.Register<CellToggleFlagMessage>(this, OnCellToggleFlag);
         _messenger.Register<RevealAdjacentCellsMessage>(this, OnRevealAdjacentCells);
 
-        SuggestACellCommand = new RelayCommand(SuggestACell, CanExecuteSuggestACell);
+        SuggestCellsCommand = new RelayCommand(SuggestACell, CanExecuteSuggestCells);
+        ApplySuggestionsCommand = new RelayCommand(ApplySuggestions);
 
         GameTimer.Start();
     }
 
-    private bool CanExecuteSuggestACell() => Game.State == GameState.Running;
+    public void Cleanup()
+    {
+        _messenger.UnregisterAll(this);
+    }
+
+    private bool CanExecuteSuggestCells() => Game.State == GameState.Running;
 
     private void SuggestACell()
     {
-        ICellSuggestion solver = new StatisticalCellSuggestion();
+        ICellSuggestion solver = new CertainCellSuggestion();
 
         var suggestCellToReveal = solver.SuggestCellToReveal(new UserBoard(Board.Board));
         if (suggestCellToReveal is [])
             return;
 
-        foreach (var userCell in suggestCellToReveal)
+        foreach (var (userCell, suggestionType, _) in suggestCellToReveal)
         {
-            Board.GetCell(userCell.Position).IsSuggested = true;
+            Board.GetCell(userCell.Position).SetSuggested(suggestionType);
+        }
+    }
+
+    private void ApplySuggestions()
+    {
+        foreach (var cell in Board.Cells)
+        {
+            if (cell is { IsRevealed: false, IsSuggested: true })
+            {
+                switch (cell.SuggestionType)
+                {
+                    case SuggestionType.Reveal:
+                        cell.RevealCellCommand.Execute(null);
+                        break;
+                    case SuggestionType.Flag:
+                        cell.ToggleFlagCommand.Execute(null);
+                        break;
+                    case null:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
         }
     }
 
     private void Refresh()
     {
         RefreshCells(Board.Cells);
-        SuggestACellCommand.NotifyCanExecuteChanged();
+        SuggestCellsCommand.NotifyCanExecuteChanged();
     }
 
     private static void RefreshCells(params IEnumerable<CellViewModel> cells)
@@ -88,13 +119,13 @@ public sealed class GameViewModel : ObservableObject
     private void OnCellRevealed(object recipient, CellRevealedMessage message)
     {
         var operationResult = Game.RevealCell(message.Cell.Cell, out var affectedCells);
-        message.Cell.IsSuggested = false;
+        message.Cell.ClearSuggested();
 
         if (affectedCells.Count != 0)
             RefreshCells(affectedCells.Select(c =>
             {
                 var cellViewModel = Board.GetCell(c.Position);
-                cellViewModel.IsSuggested = false;
+                cellViewModel.ClearSuggested();
                 return cellViewModel;
             }));
 
@@ -107,7 +138,7 @@ public sealed class GameViewModel : ObservableObject
     {
         var operationResult = Game.ToggleFlag(message.Cell.Position);
 
-        message.Cell.IsSuggested = false;
+        message.Cell.ClearSuggested();
 
         RefreshCells(message.Cell);
 
@@ -121,15 +152,15 @@ public sealed class GameViewModel : ObservableObject
         var operationResult = Game.RevealObviousNeighborCells(message.Cell.Cell, out var affectedCells);
 
         if (affectedCells.Count != 0)
-            RefreshCells(affectedCells.Select(c => Board.GetCell(c.Position)));
+            RefreshCells(affectedCells.Select(c =>
+            {
+                var cell = Board.GetCell(c.Position);
+                cell.ClearSuggested();
+                return cell;
+            }));
 
         OnPropertyChanged(nameof(UnrevealedMinesCount));
 
         HandleGameResult(operationResult);
-    }
-
-    public void Cleanup()
-    {
-        _messenger.UnregisterAll(this);
     }
 }
