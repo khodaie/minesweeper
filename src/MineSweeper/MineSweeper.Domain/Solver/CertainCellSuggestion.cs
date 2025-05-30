@@ -17,7 +17,10 @@ public sealed class CertainCellSuggestion : ICellSuggestion
 
         while (true)
         {
-            var suggestions = FindCertainSafeCells(currentBoard);
+            var suggestions = FindCertainSafeCells(currentBoard)
+                .Concat(FindCertainBySubsetLogic(currentBoard))
+                .ToArray();
+
             // Only add suggestions for positions not already seen
             var newSuggestions = suggestions
                 .Where(s => !seenPositions.Contains(s.Cell.Position))
@@ -111,17 +114,86 @@ public sealed class CertainCellSuggestion : ICellSuggestion
             var hiddenNeighbors = neighborCells.Where(nc => nc.IsHidden).ToList();
             var flaggedNeighbors = neighborCells.Count(nc => nc.State == CellState.Flagged);
 
-            if (hiddenNeighbors is not [] &&
+            if (hiddenNeighbors.Count > 0 &&
                 hiddenNeighbors.Count == cell.NeighborMinesCount!.Value - flaggedNeighbors)
             {
                 suggestions.AddRange(hiddenNeighbors.Select(hidden =>
                     (hidden, SuggestionType.Flag, SuggestionCertainty.Certain)));
             }
 
-            if (flaggedNeighbors == cell.NeighborMinesCount!.Value && hiddenNeighbors is not [])
+            if (flaggedNeighbors == cell.NeighborMinesCount!.Value && hiddenNeighbors.Count > 0)
             {
                 suggestions.AddRange(hiddenNeighbors.Select(hidden =>
                     (hidden, SuggestionType.Reveal, SuggestionCertainty.Certain)));
+            }
+        }
+
+        return suggestions
+            .GroupBy(s => s.Cell.Position)
+            .Select(g => g.First())
+            .ToArray();
+    }
+
+    private static (IUserCell Cell, SuggestionType Type, SuggestionCertainty Certainty)[] FindCertainBySubsetLogic(
+        IUserBoard board)
+    {
+        var suggestions = new List<(IUserCell Cell, SuggestionType Type, SuggestionCertainty Certainty)>();
+
+        // Precompute revealed cells and their hidden/flagged neighbors
+        var revealedCells = board.GetAllCells()
+            .Where(cell => cell is { State: CellState.Revealed, NeighborMinesCount: > 0 })
+            .ToList();
+
+        // Map: cell -> (hidden set, flagged count, mines left)
+        var cellInfo = new List<(IUserCell Cell, HashSet<Position> Hidden, int MinesLeft)>(revealedCells.Count);
+        foreach (var cell in revealedCells)
+        {
+            var neighbors = board.GetNeighborCells(cell.Position);
+            var flagged = 0;
+            var hidden = new HashSet<Position>();
+            foreach (var n in neighbors)
+            {
+                if (n.State == CellState.Flagged) flagged++;
+                else if (n.IsHidden) hidden.Add(n.Position);
+            }
+
+            var minesLeft = cell.NeighborMinesCount!.Value - flagged;
+            if (minesLeft < 0) continue; // Defensive: skip inconsistent state
+            cellInfo.Add((cell, hidden, minesLeft));
+        }
+
+        // For each pair, only check if A.Hidden is a subset of B.Hidden and A != B
+        for (var i = 0; i < cellInfo.Count; i++)
+        {
+            var (_, hiddenA, minesA) = cellInfo[i];
+            if (hiddenA.Count == 0) continue;
+            for (var j = 0; j < cellInfo.Count; j++)
+            {
+                if (i == j) continue;
+                var (_, hiddenB, minesB) = cellInfo[j];
+                if (hiddenA.Count >= hiddenB.Count) continue; // Only proper subsets
+                if (!hiddenA.IsSubsetOf(hiddenB)) continue;
+
+                var diff = hiddenB.Count == hiddenA.Count ? [] : hiddenB.Except(hiddenA).ToArray();
+                var mineDiff = minesB - minesA;
+                if (mineDiff == diff.Length && mineDiff > 0)
+                {
+                    // All cells in diff must be mines
+                    suggestions.AddRange(from pos in diff
+                        select board.GetCell(pos)
+                        into cell
+                        where cell.State == CellState.Hidden
+                        select (cell, SuggestionType.Flag, SuggestionCertainty.Certain));
+                }
+                else if (mineDiff == 0 && diff.Length > 0)
+                {
+                    // All cells in diff must be safe
+                    suggestions.AddRange(from pos in diff
+                        select board.GetCell(pos)
+                        into cell
+                        where cell.State == CellState.Hidden
+                        select (cell, SuggestionType.Reveal, SuggestionCertainty.Certain));
+                }
             }
         }
 
