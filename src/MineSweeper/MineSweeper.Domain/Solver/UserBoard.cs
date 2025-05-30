@@ -24,7 +24,7 @@ public sealed class UserBoard(IBoard board) : IUserBoard
     public IUserCell GetCell(in Position pos) =>
         UserCell.FromCell(Board.GetCell(in pos));
 
-    public IEnumerable<IUserCell> GetNeighborCells(in Position position)
+    public IEnumerable<IUserCell> GetNeighborCells(Position position)
     {
         return GetNeighborPositions(position)
             .Select(p => _allPositions[p]);

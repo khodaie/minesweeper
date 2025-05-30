@@ -26,7 +26,7 @@ internal sealed class ManualUserBoard : IUserBoard
     public IUserCell GetCell(in Position pos) =>
         _cells[pos];
 
-    public IEnumerable<IUserCell> GetNeighborCells(in Position position)
+    public IEnumerable<IUserCell> GetNeighborCells(Position position)
     {
         return GetNeighborPositions(position)
             .Where(_cells.ContainsKey)
