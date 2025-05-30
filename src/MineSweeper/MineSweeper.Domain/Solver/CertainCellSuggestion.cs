@@ -2,16 +2,16 @@ namespace MineSweeper.Domain.Solver;
 
 public sealed class CertainCellSuggestion : ICellSuggestion
 {
-    public IReadOnlyList<(IUserCell Cell, SuggestionType Type, SuggestionCertainty Certainty)> SuggestCellToReveal(
+    public IReadOnlyList<SuggestionResult> SuggestCellToReveal(
         IUserBoard board)
     {
         return GetAllCertainSuggestionsUntilStable(board);
     }
 
-    private static List<(IUserCell Cell, SuggestionType Type, SuggestionCertainty Certainty)>
+    private static List<SuggestionResult>
         GetAllCertainSuggestionsUntilStable(IUserBoard initialBoard)
     {
-        var allSuggestions = new List<(IUserCell Cell, SuggestionType Type, SuggestionCertainty Certainty)>();
+        var allSuggestions = new List<SuggestionResult>();
         var currentBoard = initialBoard;
         var seenPositions = new HashSet<Position>();
 
@@ -64,7 +64,7 @@ public sealed class CertainCellSuggestion : ICellSuggestion
                     continue;
 
                 var cell = currentBoard.GetCell(pos);
-                allSuggestions.Add((cell, SuggestionType.Reveal, SuggestionCertainty.Certain));
+                allSuggestions.Add(new SuggestionResult(cell, SuggestionType.Reveal, SuggestionCertainty.Certain));
             }
 
             // Apply suggestions to create a new board state
@@ -109,10 +109,10 @@ public sealed class CertainCellSuggestion : ICellSuggestion
         return allSuggestions;
     }
 
-    private static (IUserCell Cell, SuggestionType Type, SuggestionCertainty Certainty)[]
+    private static SuggestionResult[]
         FindCertainSafeCells(IUserBoard board, int remainingMines)
     {
-        var suggestions = new List<(IUserCell Cell, SuggestionType Type, SuggestionCertainty Certainty)>();
+        var suggestions = new List<SuggestionResult>();
 
         foreach (var cell in board.GetAllCells()
                      .Where(cell => cell is { State: CellState.Revealed, NeighborMinesCount: > 0 }))
@@ -130,14 +130,14 @@ public sealed class CertainCellSuggestion : ICellSuggestion
                 if (remainingMines >= hiddenNeighbors.Count)
                 {
                     suggestions.AddRange(hiddenNeighbors.Select(hidden =>
-                        (hidden, SuggestionType.Flag, SuggestionCertainty.Certain)));
+                        new SuggestionResult(hidden, SuggestionType.Flag, SuggestionCertainty.Certain)));
                 }
             }
 
             if (flaggedNeighbors == cell.NeighborMinesCount!.Value && hiddenNeighbors.Count > 0)
             {
                 suggestions.AddRange(hiddenNeighbors.Select(hidden =>
-                    (hidden, SuggestionType.Reveal, SuggestionCertainty.Certain)));
+                    new SuggestionResult(hidden, SuggestionType.Reveal, SuggestionCertainty.Certain)));
             }
         }
 
@@ -146,7 +146,7 @@ public sealed class CertainCellSuggestion : ICellSuggestion
         if (allHidden.Count > 0 && allHidden.Count == remainingMines)
         {
             suggestions.AddRange(allHidden.Select(hidden =>
-                (hidden, SuggestionType.Flag, SuggestionCertainty.Certain)));
+                new SuggestionResult(hidden, SuggestionType.Flag, SuggestionCertainty.Certain)));
         }
 
         return suggestions
@@ -155,10 +155,10 @@ public sealed class CertainCellSuggestion : ICellSuggestion
             .ToArray();
     }
 
-    private static (IUserCell Cell, SuggestionType Type, SuggestionCertainty Certainty)[] FindCertainBySubsetLogic(
+    private static SuggestionResult[] FindCertainBySubsetLogic(
         IUserBoard board, int remainingMines)
     {
-        var suggestions = new List<(IUserCell Cell, SuggestionType Type, SuggestionCertainty Certainty)>();
+        var suggestions = new List<SuggestionResult>();
 
         // Precompute revealed cells and their hidden/flagged neighbors
         var revealedCells = board.GetAllCells()
@@ -206,7 +206,7 @@ public sealed class CertainCellSuggestion : ICellSuggestion
                             select board.GetCell(pos)
                             into cell
                             where cell.State == CellState.Hidden
-                            select (cell, SuggestionType.Flag, SuggestionCertainty.Certain));
+                            select new SuggestionResult(cell, SuggestionType.Flag, SuggestionCertainty.Certain));
                     }
                 }
                 else if (mineDiff == 0 && diff.Length > 0)
@@ -216,7 +216,7 @@ public sealed class CertainCellSuggestion : ICellSuggestion
                         select board.GetCell(pos)
                         into cell
                         where cell.State == CellState.Hidden
-                        select (cell, SuggestionType.Reveal, SuggestionCertainty.Certain));
+                        select new SuggestionResult(cell, SuggestionType.Reveal, SuggestionCertainty.Certain));
                 }
             }
         }
@@ -226,7 +226,7 @@ public sealed class CertainCellSuggestion : ICellSuggestion
         if (allHidden.Count > 0 && allHidden.Count == remainingMines)
         {
             suggestions.AddRange(allHidden.Select(hidden =>
-                (hidden, SuggestionType.Flag, SuggestionCertainty.Certain)));
+                new SuggestionResult(hidden, SuggestionType.Flag, SuggestionCertainty.Certain)));
         }
 
         return suggestions

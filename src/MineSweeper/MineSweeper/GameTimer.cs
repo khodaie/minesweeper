@@ -9,8 +9,20 @@ public sealed class GameTimer : ObservableObject
     private readonly DispatcherTimer _timer;
     private DateTimeOffset _startedAt;
     private bool _isRunning;
+    private TimeSpan _elapsedTime;
 
-    public TimeSpan ElapsedTime { get; private set; }
+    public TimeSpan ElapsedTime
+    {
+        get => _elapsedTime;
+        private set
+        {
+            if (value == _elapsedTime)
+                return;
+            OnPropertyChanging();
+            _elapsedTime = value;
+            OnPropertyChanged();
+        }
+    }
 
     public GameTimer(TimeProvider timeProvider, TimeSpan interval)
     {
@@ -44,8 +56,6 @@ public sealed class GameTimer : ObservableObject
         if (!_isRunning)
             return;
 
-        OnPropertyChanging(nameof(ElapsedTime));
         ElapsedTime = _timeProvider.GetUtcNow() - _startedAt;
-        OnPropertyChanged(nameof(ElapsedTime));
     }
 }
